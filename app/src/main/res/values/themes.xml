@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MVVMcourseApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.MVVMcourseApp" parent="Base.Theme.MVVMcourseApp" />
+    <style name="ThemeOverlay.TestCourseApp.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
+        <item name="fullscreenTextColor">@color/light_blue_A200</item>
+    </style>
+    <style name="Theme.AnalyticalPieChart" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!--  Each backgrounds initialization  -->
+        <item name="android:windowBackground">@color/dark_black</item>
+        <item name="android:colorBackground">@color/dark_black</item>
+        <!--  Text initialization  -->
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/gray_hint</item>
+    </style>
+</resources>

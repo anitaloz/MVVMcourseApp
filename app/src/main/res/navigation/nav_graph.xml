@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/menuFragment">
+
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="com.example.mvvmcourseapp.fragments.MenuFragment"
+        android:label="Menu"
+        tools:layout="@layout/fragment_menu">
+
+        <action
+            android:id="@+id/action_menu_to_login"
+            app:destination="@id/loginFragment" />
+
+        <action
+            android:id="@+id/action_menu_to_quiz"
+            app:destination="@id/quizQuestionFragment" />
+        <action
+            android:id="@+id/action_menu_to_settings"
+            app:destination="@id/settingFragment"/>
+        <action
+            android:id="@+id/action_menu_to_statistics"
+            app:destination="@id/statisticsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.mvvmcourseapp.fragments.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settings_to_menu"
+            app:destination="@id/menuFragment"/>
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.mvvmcourseapp.fragments.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_auth"
+            app:destination="@id/authFragment" />
+
+        <action
+            android:id="@+id/action_login_to_menu"
+            app:destination="@id/menuFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="com.example.mvvmcourseapp.fragments.AuthFragment"
+        android:label="Auth"
+        tools:layout="@layout/fragment_auth">
+        <action
+            android:id="@+id/action_auth_to_login"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_auth_to_menu"
+            app:destination="@id/menuFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/quizQuestionFragment"
+        android:name="com.example.mvvmcourseapp.fragments.QuizQuestionFragment"
+        android:label="Quiz"
+        tools:layout="@layout/fragment_quiz_question">
+
+        <action
+            android:id="@+id/action_quiz_to_menu"
+            app:destination="@id/menuFragment" />
+
+        <action
+
+            android:id="@+id/action_quiz_to_result"
+            app:destination="@id/quizResultFragment" />
+
+    </fragment>
+
+
+    <fragment
+
+        android:id="@+id/quizResultFragment"
+        android:name="com.example.mvvmcourseapp.fragments.QuizResultFragment"
+        android:label="Result"
+        tools:layout="@layout/fragment_quiz_result">
+
+        <argument
+            android:name="correctAns"
+            app:argType="string" />
+
+        <argument
+            android:name="wrongAns"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_result_to_menu"
+            app:destination="@id/menuFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.example.mvvmcourseapp.fragments.StatisticsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_statistics">
+        <action
+        android:id="@+id/action_statistics_to_menu"
+        app:destination="@id/menuFragment"/>
+    </fragment>
+    <action
+        android:id="@+id/action_global_main"
+        app:destination="@id/menuFragment"
+        app:popUpTo="@id/menuFragment"
+        app:popUpToInclusive="true"/>
+
+    <action
+        android:id="@+id/action_global_loginFragment"
+        app:destination="@id/loginFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true"/>
+</navigation>

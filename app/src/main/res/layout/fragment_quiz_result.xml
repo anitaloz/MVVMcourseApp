@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_quiz_result"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="387dp"
+        android:background="@drawable/bubbles_background_result"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+        app:layout_constraintEnd_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/imageView2">
+
+
+        <TextView
+            android:id="@+id/bubble_result_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="@string/inPercent"
+            android:textColor="@color/purple"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="84dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/border_radius_30"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2">
+
+
+        <ImageView
+            android:id="@+id/result_point_percent"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/result_points"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0" />
+
+        <TextView
+            android:id="@+id/text_result_in_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:text="@string/inPercent"
+            android:textColor="@color/purple"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toBottomOf="@+id/result_point_percent"
+            app:layout_constraintStart_toEndOf="@+id/result_point_percent"
+            app:layout_constraintTop_toTopOf="@+id/result_point_percent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="Результат"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/text_result_in_percent"
+            app:layout_constraintTop_toBottomOf="@+id/text_result_in_percent" />
+
+
+        <ImageView
+            android:id="@+id/result_point_total_questions"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/result_points"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0" />
+
+        <TextView
+            android:id="@+id/text_result_total_questions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:text="@string/answersCountDefaultText"
+            android:textColor="@color/purple"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toBottomOf="@+id/result_point_total_questions"
+            app:layout_constraintStart_toEndOf="@+id/result_point_total_questions"
+            app:layout_constraintTop_toTopOf="@+id/result_point_total_questions" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="Вопросов"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/text_result_total_questions"
+            app:layout_constraintTop_toBottomOf="@+id/text_result_total_questions" />
+
+        <ImageView
+            android:id="@+id/result_point_correct"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/result_correct_point"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/text_result_correct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:text="@string/answersCountDefaultText"
+            android:textColor="@color/green"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toBottomOf="@+id/result_point_correct"
+            app:layout_constraintStart_toEndOf="@+id/result_point_correct"
+            app:layout_constraintTop_toTopOf="@+id/result_point_correct" />
+
+        <TextView
+            android:id="@+id/text_correct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="Верно"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/text_result_correct"
+            app:layout_constraintTop_toBottomOf="@+id/text_result_correct" />
+
+
+        <ImageView
+            android:id="@+id/result_point_wrong"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/result_wrong_point"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/text_result_wrong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:text="@string/answersCountDefaultText"
+            android:textColor="@color/red"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toBottomOf="@+id/result_point_wrong"
+            app:layout_constraintStart_toEndOf="@+id/result_point_wrong"
+            app:layout_constraintTop_toTopOf="@+id/result_point_wrong" />
+
+        <TextView
+            android:id="@+id/text_wrong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="Неверно"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/text_result_wrong"
+            app:layout_constraintTop_toBottomOf="@+id/text_result_wrong" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/lvlFeedBack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/success_background_modern"
+        android:text="FEEDBACK"
+        android:gravity="center"
+        android:textSize="15sp"
+        android:fontFamily="@font/montserrat_ace_medium"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        android:elevation="4dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout3"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"/>
+
+    <Button
+        android:id="@+id/button_to_menu"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:backgroundTint="@color/purple"
+        android:fontFamily="@font/montserrat_ace_medium"
+        android:text="В меню"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

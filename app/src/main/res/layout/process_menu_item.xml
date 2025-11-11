@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/button_lang"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:elevation="20dp"
+    android:background="@drawable/border_radius_10"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:padding="15dp">
+
+    <ImageView
+        android:id="@+id/process_button_image"
+        android:layout_width="110dp"
+        android:layout_height="70dp"
+        android:src="@drawable/py"
+        android:padding="10dp"
+        android:background="@drawable/button_square_selector"
+        android:contentDescription="@string/button_Python"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="0dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/process_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:text="@string/button_Python"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:layout_marginStart="10dp"/>
+
+        <TextView
+        android:id="@+id/process_button_count_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/montserrat_ace_medium"
+        android:text="@string/button_Python"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+            android:layout_marginStart="10dp"/>
+    </LinearLayout>
+</LinearLayout>

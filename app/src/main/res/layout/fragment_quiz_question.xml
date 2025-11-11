@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_quiz_question"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    >
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+
+        android:id="@+id/shapeableImageView"
+        android:layout_width="match_parent"
+        android:layout_height="278dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/menu_bubbles"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/RoundedCorners" />
+
+    <ImageButton
+        android:id="@+id/back_to_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="50dp"
+        android:contentDescription="@string/button_quiz_to_menu"
+
+        android:background="@drawable/arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+
+        android:id="@+id/constraintLayout"
+        android:layout_width="326dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="193dp"
+        android:background="@drawable/border_radius_quiz"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <TextView
+            android:id="@+id/correct_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:padding="10dp"
+            android:text="@string/answersCountDefaultText"
+            android:textColor="@color/green"
+            android:textSize="18sp"
+
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/correctAnsCountCD"
+            android:src="@drawable/correct_answers_shape"
+            app:layout_constraintBottom_toBottomOf="@+id/correct_count"
+            app:layout_constraintEnd_toStartOf="@+id/question_count"
+            app:layout_constraintHorizontal_bias="0.3"
+            app:layout_constraintStart_toEndOf="@+id/correct_count"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/correctAnsCountCD"
+            android:src="@drawable/wrong_answers_shape"
+            app:layout_constraintBottom_toBottomOf="@+id/wrong_count"
+            app:layout_constraintEnd_toStartOf="@+id/wrong_count"
+            app:layout_constraintHorizontal_bias="0.901"
+
+            app:layout_constraintStart_toEndOf="@+id/question_count"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.518" />
+
+        <TextView
+            android:id="@+id/wrong_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:padding="10dp"
+            android:text="@string/answersCountDefaultText"
+            android:textColor="@color/red"
+            android:textSize="18sp"
+            android:textStyle="bold"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/question_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="98dp"
+            android:layout_marginTop="35dp"
+            android:layout_marginEnd="96dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+            android:padding="10dp"
+            android:text="@string/question_order"
+            android:textColor="@color/purple"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/questionTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="30dp"
+            android:fontFamily="@font/montserrat_ace_medium"
+
+            android:padding="10dp"
+            android:text="@string/questionTextDefaultText"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle=""
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/question_count" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+
+        android:id="@+id/option_item_recycler"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.3" />
+
+    <com.example.mvvmcourseapp.UIhelper.CustomTimerView
+        android:id="@+id/timerView"
+        android:elevation="4dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="152dp"
+        android:background="@drawable/timer_back"
+        app:customFont="@font/montserrat_ace_medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView"
+        app:strokeWidth="4dp"
+        app:textSize="30sp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
