@@ -216,7 +216,10 @@ class QuizQuestionRepo(private val dao: QuizQuestionDao)
         else interval=(interval*EF).toInt()
         var EFnew=EF+(0.1-(3-q)*(0.08+(3-q)*0.02))
         if(EFnew<1.3) EFnew=1.3
-        val newsrs = if(q!=0) SRSTools(srsTools.id, EFnew, srsTools.n+1, interval, System.currentTimeMillis(), srsTools.qqId, srsTools.userId) else SRSTools(srsTools.id, EFnew, 1, 1, System.currentTimeMillis(), srsTools.qqId, srsTools.userId)
+        val newsrs = if(q!=0) SRSTools(srsTools.id, EFnew, srsTools.n+1,
+            interval, System.currentTimeMillis(), srsTools.qqId, srsTools.userId)
+        else SRSTools(srsTools.id, EFnew, 1, 1, System.currentTimeMillis(),
+            srsTools.qqId, srsTools.userId)
         dao.updateSrsTools(newsrs)
     }
 
@@ -226,3 +229,5 @@ class QuizQuestionRepo(private val dao: QuizQuestionDao)
 
 
 }
+
+

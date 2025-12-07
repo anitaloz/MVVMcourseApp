@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("plugin.serialization") version "2.1.10"
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -12,6 +12,19 @@ android {
     namespace = "com.example.mvvmcourseapp"
     compileSdk = 35
 
+//    testOptions {
+//        unitTests {
+//            isIncludeAndroidResources = true
+//            all {
+//                // ✅ ОТКЛЮЧИТЕ параллельное выполнение
+//                it.maxParallelForks = 1
+//                it.forkEvery = 0
+//                // ✅ Используйте JUnit Platform
+//                it.useJUnitPlatform()
+//            }
+//        }
+//    }
+
     defaultConfig {
         applicationId = "com.example.mvvmcourseapp"
         minSdk = 24
@@ -21,6 +34,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
 
     buildTypes {
         release {
@@ -52,6 +66,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.hilt.android)
+    //implementation(libs.androidx.compiler)
     ksp(libs.hilt.android.compiler)
     // Room
     implementation(libs.androidx.room.runtime)
@@ -86,9 +101,24 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.security.crypto)
     // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.test.ext.junit)
+//    androidTestImplementation(libs.androidx.test.espresso.core)
+    // Тестирование
+//    testImplementation (libs.androidx.core)
+//    testImplementation(libs.kotlinx.coroutines.test.v171)
+//    testImplementation(libs.androidx.core.testing)
+//
+//    // Mocking
+//    testImplementation (libs.mockk)
+//    testImplementation (libs.mockk.agent.jvm)
+//
+//    // AndroidX Testing
+//    androidTestImplementation (libs.androidx.junit.v130)
+//    androidTestImplementation (libs.androidx.espresso.core.v370)
+//    androidTestImplementation (libs.androidx.ui.test.junit4)
+//    testImplementation(kotlin("test"))
 
 
 }
+

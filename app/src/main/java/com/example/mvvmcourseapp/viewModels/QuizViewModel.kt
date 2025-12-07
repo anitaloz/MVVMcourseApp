@@ -271,7 +271,7 @@ class QuizViewModel(
         }
     }
 
-    private fun stringScoreDisplay(score: Int) : String {
+    fun stringScoreDisplay(score: Int) : String {
         if(score==0)
             return "0"
         if (score < 10) {

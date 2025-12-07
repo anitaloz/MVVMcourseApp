@@ -33,3 +33,5 @@ data class SRSTools (
     @ColumnInfo(name="qq_id") val qqId: Int,
     @ColumnInfo(name="user_id") val userId:Int
 )
+
+

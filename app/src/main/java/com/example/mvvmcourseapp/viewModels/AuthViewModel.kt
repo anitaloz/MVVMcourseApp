@@ -44,7 +44,7 @@ class AuthViewModel(
             showValidationFeedbackError("Пароль должен содержать минимум 6 символов")
             return
         }
-        if(!email.isValidEmail())
+        if(!isValidEmail(email))
         {
             showValidationFeedbackError("Почта введена некорректно")
             return
@@ -70,9 +70,9 @@ class AuthViewModel(
             }
         }
     }
-    fun String.isValidEmail(): Boolean {
+    fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
-        return this.matches(emailRegex.toRegex())
+        return email.matches(emailRegex.toRegex())
     }
     fun navigateToLogin() {
         sendEvent(AuthEvent.NavigateToLogin)

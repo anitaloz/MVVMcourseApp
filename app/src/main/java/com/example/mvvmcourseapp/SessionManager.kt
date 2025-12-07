@@ -18,7 +18,6 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString(KEY_USER_LOGIN, null)
     }
 
-    // Сохраняем статус входа
     fun saveAuthToken(userLogin: String, generateNewToken: Boolean = false) {
         val token = if (generateNewToken || fetchAuthToken() == null) {
             generateSecureToken()
@@ -40,17 +39,14 @@ class SessionManager(context: Context) {
 
     }
 
-    // Получаем токен
     fun fetchAuthToken(): String? {
         return sharedPreferences.getString(KEY_AUTH_TOKEN, null)
     }
 
-    // Проверяем, вошел ли пользователь
     fun isLoggedIn(): Boolean {
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)
     }
 
-    // Выход (очищаем данные)
     fun logout() {
         sharedPreferences.edit().clear().apply()
     }
