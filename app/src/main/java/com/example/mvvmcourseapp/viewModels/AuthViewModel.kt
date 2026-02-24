@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.mvvmcourseapp.PassHash
 import com.example.mvvmcourseapp.SessionManager
+import com.example.mvvmcourseapp.data.DTO.RegisterRequest
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
@@ -26,9 +27,6 @@ import kotlinx.coroutines.withContext
 
 class AuthViewModel(
     private val userRepo: UserRepo,
-    private val sessionManager: SessionManager,
-    private val sharedViewModel: SharedViewModel,
-    private val quizQuestionRepo: QuizQuestionRepo
 ) : ViewModel()
 {
 
@@ -49,26 +47,22 @@ class AuthViewModel(
             showValidationFeedbackError("Почта введена некорректно")
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                val hashedPassword = PassHash.hashPassword(password)
-                val user = User(id = null, login = login, email = email, pass = hashedPassword)
-                val listLang=quizQuestionRepo.getLangs().first()
-                Log.d("ЯЗЫКИ",listLang.toString() )
-                val userExists = userRepo.authentication(login, user, listLang)
+                val success = userRepo.register(login, email, password)
 
-                if (userExists) {
-                    showValidationFeedbackError("Пользователь $login уже зарегистрирован")
+                if (!success) {
+                    showValidationFeedbackError("Пользователь уже существует")
                 } else {
-                    val u= User(null, login, email, hashedPassword)
-                    userRepo.authentication(login, u, listLang)
-                    showError("Пользователь $login успешно зарегистрирован")
+                    showError("Пользователь успешно зарегистрирован")
                     navigateToLogin()
                 }
+
             } catch (e: Exception) {
                 sendEvent(AuthEvent.ShowError("Ошибка регистрации: ${e.message}"))
             }
         }
+
     }
     fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"

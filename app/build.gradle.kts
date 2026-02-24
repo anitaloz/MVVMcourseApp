@@ -24,6 +24,11 @@ android {
 //            }
 //        }
 //    }
+    packaging {
+        resources {
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
 
     defaultConfig {
         applicationId = "com.example.mvvmcourseapp"
@@ -100,6 +105,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.security.crypto)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
     // Testing
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.test.ext.junit)

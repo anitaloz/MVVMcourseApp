@@ -25,35 +25,45 @@ class LoginViewModel(
     private val _events = Channel<LoginEvent>()
     val events = _events.receiveAsFlow()
 
-    fun authentication(login:String, pass:String){
+    fun authentication(login: String, pass: String) {
         if (login.isEmpty() || pass.isEmpty()) {
             showValidationFeedbackError("Заполните все поля")
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                val loginSuccess=userRepo.login(login, pass)
-                val userLogged=userRepo.getUserByLogin(login)
-                withContext(Dispatchers.Main) {
-                    if (loginSuccess) {
-                        sendEvent(LoginEvent.showToast("Добро пожаловать, $login!"))
-                        navigateToMenu()
-                        if(userLogged!=null) {
-                            sharedViewModel.setUser(userLogged)
-                            sessionManager.saveAuthToken(userLogged.login)
-                        }
-                    } else {
-                        showValidationFeedbackError("Неверное имя пользователя или пароль")
-                    }
+                // 1. Логинимся → сервер вернёт токены
+                val loginSuccess = userRepo.login(login, pass)
+
+                if (!loginSuccess) {
+                    showValidationFeedbackError("Неверное имя пользователя или пароль")
+                    return@launch
                 }
+
+                // 2. Получаем текущего пользователя с сервера
+                val userResponse = userRepo.getCurrentUser()
+
+                // 3. Кладём в SharedViewModel
+                sharedViewModel.setUser(
+                    User(
+                        id = userResponse.id,
+                        login = userResponse.login,
+                        email = userResponse.email,
+                        pass = "" // пароль не нужен
+                    )
+                )
+
+                // 4. Навигация
+                sendEvent(LoginEvent.showToast("Добро пожаловать, ${userResponse.login}!"))
+                navigateToMenu()
+
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    sendEvent(LoginEvent.showToast("Ошибка: ${e.message}"))
-                }
+                sendEvent(LoginEvent.showToast("Ошибка: ${e.message}"))
             }
         }
     }
+
     fun showValidationFeedbackError(state:String)
     {
         sendEvent(LoginEvent.ShowValidationFeedbackError(state))

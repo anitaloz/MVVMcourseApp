@@ -29,7 +29,7 @@ object ViewModelFactory {
         }
 
         initializer {
-            AuthViewModel(userRepo, sessionManager, sharedViewModel, quizQuestionRepo)
+            AuthViewModel(userRepo)
         }
 
         initializer {

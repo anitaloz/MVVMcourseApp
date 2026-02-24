@@ -40,8 +40,10 @@ class SettingsViewModel(
             val userSettingsList=userRepo.getUserSettings(sharedViewModel.user.value!!)
             val langLvlViewList=userRepo.getUserSettingsAndLangNames(sharedViewModel.user.value!!)
             Log.d("LISTOFLANGLVLS22", langLvlViewList.toString())
-            _uiState.value=_uiState.value.copy(newQuestionsInQuiz = userSettingsList.first().newQ)
-            _uiState.value=_uiState.value.copy(repeatableQuestionsInQuiz = userSettingsList.first().maxRepQuestions)
+            _uiState.value=_uiState.value.copy(newQuestionsInQuiz = userSettingsList.firstOrNull()?.newQ
+                ?: -1)
+            _uiState.value=_uiState.value.copy(repeatableQuestionsInQuiz = userSettingsList.firstOrNull()?.maxRepQuestions
+                ?: -1)
             _uiState.value=_uiState.value.copy(listOfLanglLvls = langLvlViewList)
         }
     }

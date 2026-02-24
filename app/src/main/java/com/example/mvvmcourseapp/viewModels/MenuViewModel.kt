@@ -8,6 +8,7 @@ import com.example.mvvmcourseapp.R
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.UIhelper.LangButton
 import com.example.mvvmcourseapp.UIhelper.ProcessButton
+import com.example.mvvmcourseapp.data.DTO.UserResponse
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.Option
@@ -52,33 +53,41 @@ class MenuViewModel(
 
     //Проверяем авторизацию и грузим пользователя
     private fun checkSession() {
-        val login = sessionManager.getUserLogin()
-        if (sessionManager.isLoggedIn() && login != null) {
-            _uiState.value=_uiState.value.copy(userLoading=true)
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    val dbUser = userRepo.getUserByLogin(login)
-                    withContext(Dispatchers.Main) {
-                        if (dbUser != null) {
-                            sharedViewModel.setUser(dbUser)
-                        } else {
-                            sharedViewModel.setUser(null) //
-                            sessionManager.logout()
-                        }
-                        _uiState.value=_uiState.value.copy(userLoading=false)
+        if (!sessionManager.isLoggedIn()) {
+            _uiState.value = _uiState.value.copy(loading = false)
+            return
+        }
+
+        _uiState.value = _uiState.value.copy(userLoading = true)
+
+        viewModelScope.launch {
+            try {
+                val user = userRepo.getCurrentUser()
+                sharedViewModel.setUser(User(user.id, user.login, user.email, ""))
+                _uiState.value = _uiState.value.copy(userLoading = false)
+
+            } catch (e: Exception) {
+                // Если access истёк → пробуем обновить
+                val refreshed = userRepo.refreshToken()
+
+                if (refreshed) {
+                    try {
+                        val user = userRepo.getCurrentUser()
+                        sharedViewModel.setUser(User(user.id, user.login, user.email, ""))
+                    } catch (e: Exception) {
+                        sessionManager.logout()
+                        sharedViewModel.setUser(null)
                     }
-                } catch (e: Exception) {
-                    Log.e("MenuViewModel", "Ошибка загрузки пользователя: ${e.message}")
-                    withContext(Dispatchers.Main) {
-                        _uiState.value=_uiState.value.copy(loading=false)
-                    }
+                } else {
+                    sessionManager.logout()
+                    sharedViewModel.setUser(null)
                 }
+
+                _uiState.value = _uiState.value.copy(loading = false)
             }
-        } else {
-            Log.d("MenuViewModel", "No active session or login is null")
-            _uiState.value=_uiState.value.copy(loading=false)
         }
     }
+
 
 
     //Загрузка кнопок языков
