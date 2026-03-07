@@ -18,7 +18,6 @@ import kotlinx.coroutines.withContext
 
 class LoginViewModel(
     private val userRepo: UserRepo,
-    private val sessionManager: SessionManager,
     private val sharedViewModel: SharedViewModel
 ) : ViewModel()
 {
@@ -59,7 +58,8 @@ class LoginViewModel(
                 navigateToMenu()
 
             } catch (e: Exception) {
-                sendEvent(LoginEvent.showToast("Ошибка: ${e.message}"))
+                //sendEvent(LoginEvent.showToast("Ошибка: ${e.message}"))
+                showValidationFeedbackError("Неверное имя пользователя или пароль")
             }
         }
     }

@@ -4,9 +4,9 @@ import com.example.mvvmcourseapp.PassHash
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.UIhelper.LangLvlView
 import com.example.mvvmcourseapp.data.DTO.LoginRequest
-import com.example.mvvmcourseapp.data.DTO.RefreshRequest
-import com.example.mvvmcourseapp.data.DTO.RegisterRequest
-import com.example.mvvmcourseapp.data.DTO.UserResponse
+import com.example.mvvmcourseapp.data.DTO.users.RefreshRequest
+import com.example.mvvmcourseapp.data.DTO.users.RegisterRequest
+import com.example.mvvmcourseapp.data.DTO.users.UserResponse
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.dao.Dao
 import com.example.mvvmcourseapp.data.models.UserSettings
@@ -27,6 +27,14 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
 
     suspend fun register(login: String, email: String, password: String): Boolean {
         val response = api.register(RegisterRequest(login, email, password))
+        if (response.isSuccessful) {
+            dao.addUser(User(response.body()!!.id, login, email, password))
+            val listOfSettings = api.getUserSettings()
+            for (item in listOfSettings) {
+                dao.addUserSettings(UserSettings(item.id, item.user, item.lang, item.new_questions, item.max_rep_questions))
+            }
+            dao.addUserSettings(UserSettings(null, response.body()!!.id, 1))
+        }
         return response.isSuccessful
     }
 

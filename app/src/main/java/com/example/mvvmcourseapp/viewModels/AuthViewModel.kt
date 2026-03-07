@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.mvvmcourseapp.PassHash
 import com.example.mvvmcourseapp.SessionManager
-import com.example.mvvmcourseapp.data.DTO.RegisterRequest
+import com.example.mvvmcourseapp.data.DTO.users.RegisterRequest
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
@@ -62,8 +62,8 @@ class AuthViewModel(
                 sendEvent(AuthEvent.ShowError("Ошибка регистрации: ${e.message}"))
             }
         }
-
     }
+
     fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
         return email.matches(emailRegex.toRegex())

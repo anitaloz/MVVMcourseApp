@@ -31,7 +31,6 @@ class SettingsViewModel(
     val events=_events.receiveAsFlow()
 
     init{
-
         renderUiState()
     }
     private fun renderUiState()

@@ -8,7 +8,7 @@ import com.example.mvvmcourseapp.R
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.UIhelper.LangButton
 import com.example.mvvmcourseapp.UIhelper.ProcessButton
-import com.example.mvvmcourseapp.data.DTO.UserResponse
+import com.example.mvvmcourseapp.data.DTO.users.UserResponse
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.Option

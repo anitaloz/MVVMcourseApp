@@ -33,7 +33,7 @@ object ViewModelFactory {
         }
 
         initializer {
-            LoginViewModel(userRepo, sessionManager, sharedViewModel)
+            LoginViewModel(userRepo, sharedViewModel)
         }
 
         initializer {

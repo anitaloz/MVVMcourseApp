@@ -4,15 +4,16 @@ import com.example.mvvmcourseapp.data.DTO.LangResponse
 import com.example.mvvmcourseapp.data.DTO.LoginRequest
 import com.example.mvvmcourseapp.data.DTO.OptionResponse
 import com.example.mvvmcourseapp.data.DTO.QuizQuestionResponse
-import com.example.mvvmcourseapp.data.DTO.RefreshRequest
-import com.example.mvvmcourseapp.data.DTO.RegisterRequest
-import com.example.mvvmcourseapp.data.DTO.SettingsWithLangResponse
+import com.example.mvvmcourseapp.data.DTO.users.RefreshRequest
+import com.example.mvvmcourseapp.data.DTO.users.RegisterRequest
+import com.example.mvvmcourseapp.data.DTO.users.SettingsWithLangResponse
 import com.example.mvvmcourseapp.data.DTO.SrsResponse
 import com.example.mvvmcourseapp.data.DTO.TokenResponse
-import com.example.mvvmcourseapp.data.DTO.UpdateSettingsRequest
+import com.example.mvvmcourseapp.data.DTO.users.UpdateSettingsRequest
 import com.example.mvvmcourseapp.data.DTO.UpdateSrsRequest
-import com.example.mvvmcourseapp.data.DTO.UserResponse
-import com.example.mvvmcourseapp.data.DTO.UserSettingsResponse
+import com.example.mvvmcourseapp.data.DTO.users.UserResponse
+import com.example.mvvmcourseapp.data.DTO.users.UserSettingsResponse
+import com.example.mvvmcourseapp.data.models.UserSettings
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -39,8 +40,8 @@ interface ApiService {
 
 
     // ---------- SETTINGS ----------
-    @GET("settings/")
-    suspend fun getUserSettings(): UserSettingsResponse
+    @GET("user_settings/")
+    suspend fun getUserSettings(): List<UserSettingsResponse>
 
     @PATCH("settings/")
     suspend fun updateUserSettings(@Body body: UpdateSettingsRequest): UserSettingsResponse

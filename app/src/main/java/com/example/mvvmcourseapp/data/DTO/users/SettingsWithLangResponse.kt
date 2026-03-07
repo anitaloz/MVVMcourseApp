@@ -1,4 +1,4 @@
-package com.example.mvvmcourseapp.data.DTO
+package com.example.mvvmcourseapp.data.DTO.users
 
 data class SettingsWithLangResponse(
     val settings_id: Int,
