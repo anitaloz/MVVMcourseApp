@@ -1,6 +1,8 @@
 package com.example.mvvmcourseapp.viewModels
 
+import android.Manifest
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +19,7 @@ import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
+import com.example.mvvmcourseapp.utils.NetworkUtils
 import com.example.mvvmcourseapp.viewModels.QuizViewModel.QuizEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -32,7 +35,8 @@ class MenuViewModel(
     private val userRepo: UserRepo,
     private val quizQuestionRepo: QuizQuestionRepo,
     private val sessionManager: SessionManager,
-    private val sharedViewModel: SharedViewModel
+    private val sharedViewModel: SharedViewModel,
+    private val networkUtils: NetworkUtils,
 ) : ViewModel() {
     val user: LiveData<User?> = sharedViewModel.user
 
@@ -42,13 +46,31 @@ class MenuViewModel(
     private val _events= Channel<MenuEvent>()
     val events = _events.receiveAsFlow()
     init {
-        viewModelScope.launch {
-            fillDb()
-        }
+        refreshDataIfPossible()
         checkSession()
         loadLanguages()
         search("")
+    }
 
+    private fun refreshDataIfPossible() {
+        if (networkUtils.isNetworkAvailable()) {
+            _uiState.value = _uiState.value.copy(loading = true)
+            viewModelScope.launch {
+                try {
+                    quizQuestionRepo.refreshLangs()
+                    quizQuestionRepo.refreshCategories()
+                    quizQuestionRepo.refreshQuizQuestions()
+                    quizQuestionRepo.refreshOptions()
+                    userRepo.refreshUserSettings()
+                    quizQuestionRepo.refreshSrsTools()
+                } catch (e: Exception) {
+                    MenuEvent.showError("Ошибка обновления данных: ${e.message}")
+                    // Ошибка сети или сервера, ничего не делаем —
+                    // пользователь просто продолжит видеть старые данные из Room
+                }
+            }
+            _uiState.value = _uiState.value.copy(loading = false)
+        }
     }
 
     //Проверяем авторизацию и грузим пользователя

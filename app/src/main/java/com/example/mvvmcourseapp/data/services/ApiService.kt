@@ -32,7 +32,7 @@ interface ApiService {
     suspend fun login(@Body body: LoginRequest): TokenResponse
 
     @GET("users/me/")
-    suspend fun getMe(): UserResponse
+    suspend fun getMe(): Response<UserResponse>
 
     @POST("users/token/refresh/")
     suspend fun refresh(@Body request: RefreshRequest): TokenResponse
@@ -41,9 +41,9 @@ interface ApiService {
 
     // ---------- SETTINGS ----------
     @GET("user_settings/")
-    suspend fun getUserSettings(): List<UserSettingsResponse>
+    suspend fun getUserSettings(): Response<List<UserSettingsResponse>>
 
-    @PATCH("settings/")
+    @PATCH("user_settings/update")
     suspend fun updateUserSettings(@Body body: UpdateSettingsRequest): UserSettingsResponse
 
     @GET("settings/full/")
@@ -54,26 +54,26 @@ interface ApiService {
 
 
     // ---------- LANG ----------
-    @GET("lang/")
-    suspend fun getLanguages(): List<LangResponse>
+    @GET("langs/")
+    suspend fun getLanguages(): Response<List<LangResponse>>
 
 
     // ---------- CATEGORY ----------
     @GET("categories/")
-    suspend fun getCategories(): List<CategoryResponse>
+    suspend fun getCategories(): Response<List<CategoryResponse>>
 
 
     // ---------- QUIZ ----------
     @GET("quiz/")
-    suspend fun getQuestions(): List<QuizQuestionResponse>
+    suspend fun getQuestions(): Response<List<QuizQuestionResponse>>
 
     @GET("quiz/options/")
-    suspend fun getOptions(): List<OptionResponse>
+    suspend fun getOptions(): Response<List<OptionResponse>>
 
 
     // ---------- SRS ----------
     @GET("srs/")
-    suspend fun getSrs(): List<SrsResponse>
+    suspend fun getSrs(): Response<List<SrsResponse>>
 
     @PATCH("srs/{id}/")
     suspend fun updateSrs(

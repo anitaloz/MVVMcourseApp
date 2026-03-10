@@ -1,11 +1,13 @@
 package com.example.mvvmcourseapp.data.repositories
 
+import android.util.Log
 import com.example.mvvmcourseapp.PassHash
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.UIhelper.LangLvlView
 import com.example.mvvmcourseapp.data.DTO.LoginRequest
 import com.example.mvvmcourseapp.data.DTO.users.RefreshRequest
 import com.example.mvvmcourseapp.data.DTO.users.RegisterRequest
+import com.example.mvvmcourseapp.data.DTO.users.UpdateSettingsRequest
 import com.example.mvvmcourseapp.data.DTO.users.UserResponse
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.dao.Dao
@@ -17,24 +19,36 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
     suspend fun login(login: String, password: String): Boolean {
         val response = api.login(LoginRequest(login, password))
         sessionManager.saveTokens(response.access, response.refresh)
+        val response2 = api.getMe()
+        if (response2.isSuccessful) {
+            if (dao.getUserByLogin(login) == null) {
+                dao.addUser(User(response2.body()!!.id, login, "", ""))
+            }
+        }
         return true
     }
 
     suspend fun getCurrentUser(): UserResponse {
-        return api.getMe()
+        return api.getMe().body()!!
     }
 
+    suspend fun refreshUserSettings() {
+        val response = api.getUserSettings()
+
+        if (response.isSuccessful) {
+            Log.e("USERsettings", response.body().toString())
+            val settingsFromServer = response.body() ?: emptyList()
+            val listOfSettings = settingsFromServer.map {
+                it.toUserSettings()
+            }
+            Log.d("USERSETTINGSENTITY", listOfSettings.toString())
+            dao.clearUserSettings()
+            dao.insertAllUserSettings(listOfSettings)
+        }
+    }
 
     suspend fun register(login: String, email: String, password: String): Boolean {
         val response = api.register(RegisterRequest(login, email, password))
-        if (response.isSuccessful) {
-            dao.addUser(User(response.body()!!.id, login, email, password))
-            val listOfSettings = api.getUserSettings()
-            for (item in listOfSettings) {
-                dao.addUserSettings(UserSettings(item.id, item.user, item.lang, item.new_questions, item.max_rep_questions))
-            }
-            dao.addUserSettings(UserSettings(null, response.body()!!.id, 1))
-        }
         return response.isSuccessful
     }
 
@@ -82,9 +96,9 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
     {
         return dao.getUserSettingsAndLangNames(user.id)
     }
-    suspend fun updateUserSettings(user: UserSettings)
+    suspend fun updateUserSettings(user: UpdateSettingsRequest)
     {
-        dao.updateUserSettings(user)
+        api.updateUserSettings(user)
     }
 
 }

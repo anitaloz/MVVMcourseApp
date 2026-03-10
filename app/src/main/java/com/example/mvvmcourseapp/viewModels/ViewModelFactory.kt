@@ -10,6 +10,7 @@ import com.example.mvvmcourseapp.MVVMcourseApplication
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
+import com.example.mvvmcourseapp.utils.NetworkUtils
 
 object ViewModelFactory {
     fun createFactory(
@@ -17,11 +18,12 @@ object ViewModelFactory {
         quizQuestionRepo: QuizQuestionRepo,
         userRepo: UserRepo,
         sessionManager: SessionManager,
-        sharedViewModel: SharedViewModel
+        sharedViewModel: SharedViewModel,
+        networkUtils: NetworkUtils,
     ): ViewModelProvider.Factory = viewModelFactory {
 
         initializer {
-            MenuViewModel(userRepo, quizQuestionRepo, sessionManager, sharedViewModel)
+            MenuViewModel(userRepo, quizQuestionRepo, sessionManager, sharedViewModel, networkUtils = networkUtils)
         }
 
         initializer {
@@ -41,7 +43,7 @@ object ViewModelFactory {
         }
 
         initializer {
-            SettingsViewModel(userRepo, sessionManager, sharedViewModel, quizQuestionRepo)
+            SettingsViewModel(userRepo, sessionManager, sharedViewModel)
         }
 
         initializer {

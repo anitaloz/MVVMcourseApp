@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface Dao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun addUser(user: User):Long
+    suspend fun addUser(user: User)
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun addUserSettings(userSettings: UserSettings)
@@ -44,4 +44,9 @@ interface Dao {
     @Update
     suspend fun updateUserSettings(user: UserSettings)
 
+    @Query("DELETE FROM user_settings")
+    suspend fun clearUserSettings()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllUserSettings(settings: List<UserSettings>)
 }

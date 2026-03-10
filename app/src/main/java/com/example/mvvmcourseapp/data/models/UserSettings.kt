@@ -8,13 +8,14 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @Entity(tableName = "user_settings",
+//    foreignKeys = [
+//        androidx.room.ForeignKey(
+//            entity = User::class,
+//            parentColumns = ["id"],
+//            childColumns = ["user_id"],
+//            onDelete = androidx.room.ForeignKey.CASCADE
+//        ),
     foreignKeys = [
-        androidx.room.ForeignKey(
-            entity = User::class,
-            parentColumns = ["id"],
-            childColumns = ["user_id"],
-            onDelete = androidx.room.ForeignKey.CASCADE
-        ),
     androidx.room.ForeignKey(
         entity = Lang::class,
         parentColumns = ["id"],

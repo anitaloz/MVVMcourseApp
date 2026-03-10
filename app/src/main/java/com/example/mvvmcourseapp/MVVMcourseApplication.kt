@@ -10,6 +10,7 @@ import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
 import com.example.mvvmcourseapp.data.services.ApiService
 import com.example.mvvmcourseapp.data.services.AuthInterceptor
+import com.example.mvvmcourseapp.utils.NetworkUtils
 import com.example.mvvmcourseapp.viewModels.SharedViewModel
 import com.example.mvvmcourseapp.viewModels.ViewModelFactory
 import okhttp3.OkHttpClient
@@ -24,9 +25,7 @@ class MVVMcourseApplication: Application() {
 }
 
 class AppContainer(private val application: Application, private val db: MainDb) {
-
-
-    val quizQuestionRepo: QuizQuestionRepo by lazy { QuizQuestionRepo(db.getQuizQuestionDao()) }
+    val quizQuestionRepo: QuizQuestionRepo by lazy { QuizQuestionRepo(db.getQuizQuestionDao(), api) }
     val sessionManager: SessionManager by lazy { SessionManager(application) }
 
     val userRepo: UserRepo by lazy { UserRepo(db.getDao(), api, sessionManager) }
@@ -50,7 +49,7 @@ class AppContainer(private val application: Application, private val db: MainDb)
         .build()
 
 
-    val api: ApiService by lazy {
+    private val api: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
@@ -59,13 +58,19 @@ class AppContainer(private val application: Application, private val db: MainDb)
             .create(ApiService::class.java)
     }
 
+    private val networkUtils : NetworkUtils by lazy {
+        NetworkUtils(application)
+    }
+
+
     fun getViewModelFactory(): ViewModelProvider.Factory {
         return ViewModelFactory.createFactory(
             application = application,
             quizQuestionRepo = quizQuestionRepo,
             userRepo = userRepo,
             sessionManager = sessionManager,
-            sharedViewModel = sharedViewModel
+            sharedViewModel = sharedViewModel,
+            networkUtils = networkUtils,
         )
     }
 }

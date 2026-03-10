@@ -248,6 +248,9 @@ GROUP BY c.id, l.id
     suspend fun insertSrsTools(srsTools: SRSTools)
 
     @Insert
+    suspend fun insertAllSrsTools(srsTools: List<SRSTools>)
+
+    @Insert
     suspend fun insertOption(option: Option)
 
     @Update
@@ -255,4 +258,20 @@ GROUP BY c.id, l.id
 
     @Delete
     suspend fun deleteQuizQuestion(qq: QuizQuestion)
+
+
+    @Query("DELETE FROM lang")
+    suspend fun clearAllLangs()
+
+    @Query("DELETE FROM categories")
+    suspend fun clearAllCategories()
+
+    @Query("DELETE FROM quiz_questions")
+    suspend fun clearAllQuizQuestions()
+
+    @Query("DELETE FROM options")
+    suspend fun clearAllOptions()
+
+    @Query("DELETE FROM srs_tools")
+    suspend fun clearAllSrsTools()
 }

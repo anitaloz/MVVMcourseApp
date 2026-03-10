@@ -1,5 +1,6 @@
 package com.example.mvvmcourseapp.data.repositories
 
+import android.util.Log
 import androidx.room.Query
 import com.example.mvvmcourseapp.UIhelper.StatisticsView
 import com.example.mvvmcourseapp.data.models.Category
@@ -10,9 +11,13 @@ import com.example.mvvmcourseapp.data.dao.QuizQuestionDao
 import com.example.mvvmcourseapp.data.models.SRSTools
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.models.UserSettings
+import com.example.mvvmcourseapp.data.services.ApiService
 import kotlinx.coroutines.flow.Flow
 
-class QuizQuestionRepo(private val dao: QuizQuestionDao)
+class QuizQuestionRepo(
+    private val dao: QuizQuestionDao,
+    private val api: ApiService,
+)
 {
     fun filter (s:String): Flow<List<QuizQuestionDao.CategoryFilter>>
     {
@@ -227,7 +232,97 @@ class QuizQuestionRepo(private val dao: QuizQuestionDao)
         dao.insertSrsTools(srsTools)
     }
 
+    suspend fun refreshCategories() {
+        val response = api.getCategories()
 
+        if (response.isSuccessful) {
+            val categoriesFromServer = response.body() ?: emptyList()
+            val listOfCategories = categoriesFromServer.map {
+                it.toCategory()
+            }
+            try {
+                dao.clearAllCategories()
+                dao.insertAllCategories(listOfCategories)
+            }
+            catch (e:Exception)
+            {
+                Log.d("ERROR DB",e.message.toString())
+            }
+        }
+    }
+
+    suspend fun refreshLangs() {
+        val response = api.getLanguages()
+
+        if (response.isSuccessful) {
+            val languagesFromServer = response.body() ?: emptyList()
+            val listOfLangs = languagesFromServer.map {
+                it.toLang()
+            }
+            dao.clearAllLangs()
+            dao.insertAllLang(listOfLangs)
+        }
+    }
+
+    suspend fun refreshQuizQuestions() {
+        val response = api.getQuestions()
+
+        if (response.isSuccessful) {
+            val quizQuestionsFromServer = response.body() ?: emptyList()
+            val listOfQuizQuestions = quizQuestionsFromServer.map {
+                it.toQuizQuestion()
+            }
+            dao.clearAllQuizQuestions()
+            dao.insertAllQuizQuestions(listOfQuizQuestions)
+        }
+    }
+
+    suspend fun refreshOptions() {
+        val response = api.getOptions()
+
+        if (response.isSuccessful) {
+            val optionsFromServer = response.body() ?: emptyList()
+            val listOfOptions = optionsFromServer.map {
+                it.toOption()
+            }
+            dao.clearAllOptions()
+            dao.insertAllOptions(listOfOptions)
+        }
+    }
+
+    suspend fun refreshSrsTools() {
+        val response = api.getSrs()
+
+        if (response.isSuccessful) {
+            val srsToolsFromServer = response.body() ?: emptyList()
+            val listOfSrs = srsToolsFromServer.map {
+                it.toSrs()
+            }
+            dao.clearAllSrsTools()
+            dao.insertAllSrsTools(listOfSrs)
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

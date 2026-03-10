@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.UIhelper.LangLvlView
+import com.example.mvvmcourseapp.data.DTO.users.UpdateSettingsRequest
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
@@ -22,7 +23,6 @@ class SettingsViewModel(
     private val userRepo: UserRepo,
     private val sessionManager: SessionManager,
     private val sharedViewModel: SharedViewModel,
-    private val quizQuestionRepo: QuizQuestionRepo
 ): ViewModel()  {
     private val _uiState= MutableStateFlow<SettingsUiState>(SettingsUiState())
     val uiState : StateFlow<SettingsUiState> = _uiState
@@ -72,13 +72,11 @@ class SettingsViewModel(
 
                                 for (u: LangLvlView in langLvlList) {
                                     userRepo.updateUserSettings(
-                                        UserSettings(
-                                            u.uid,
-                                            sharedViewModel.user.value?.id!!,
-                                            u.id,
+                                        UpdateSettingsRequest(
                                             newQ,
                                             repQ,
-                                            langLvl = u.lvl
+                                            u.lvl,
+                                            u.id
                                         )
                                     )
 

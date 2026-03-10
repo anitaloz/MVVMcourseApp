@@ -3,6 +3,7 @@ package com.example.mvvmcourseapp.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mvvmcourseapp.UIhelper.LangLvlView
+import com.example.mvvmcourseapp.data.DTO.users.UpdateSettingsRequest
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
@@ -46,7 +47,8 @@ class QuizResultViewModel (private val userRepo: UserRepo,
                     {
                         userSettings.langLvl=3
                     }
-                    userRepo.updateUserSettings(userSettings)
+                    userRepo.updateUserSettings(UpdateSettingsRequest(userSettings.newQ, userSettings.maxRepQuestions, userSettings.langLvl, userSettings.langId))
+                    
                     withContext(Dispatchers.Main)
                     {
                         langName=quizQuestionRepo.getLangNameByLangId(sharedViewModel.category.value!!.langId)

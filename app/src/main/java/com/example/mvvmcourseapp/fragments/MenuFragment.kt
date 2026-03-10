@@ -49,8 +49,9 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
         val application = requireActivity().application as MVVMcourseApplication
         application.appContainer
     }
-    private val menuViewModel: MenuViewModel by lazy {
-        ViewModelProvider(this, appContainer.getViewModelFactory())[MenuViewModel::class.java]
+
+    private val menuViewModel: MenuViewModel by activityViewModels {
+        appContainer.getViewModelFactory()
     }
 
     private lateinit var langAdapter: LangButtonAdapter
