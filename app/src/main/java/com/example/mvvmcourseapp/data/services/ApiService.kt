@@ -1,5 +1,6 @@
 package com.example.mvvmcourseapp.data.services
 import com.example.mvvmcourseapp.data.DTO.CategoryResponse
+import com.example.mvvmcourseapp.data.DTO.GenerateActionResponse
 import com.example.mvvmcourseapp.data.DTO.LangResponse
 import com.example.mvvmcourseapp.data.DTO.LoginRequest
 import com.example.mvvmcourseapp.data.DTO.OptionResponse
@@ -11,14 +12,20 @@ import com.example.mvvmcourseapp.data.DTO.SrsResponse
 import com.example.mvvmcourseapp.data.DTO.TokenResponse
 import com.example.mvvmcourseapp.data.DTO.users.UpdateSettingsRequest
 import com.example.mvvmcourseapp.data.DTO.UpdateSrsRequest
+import com.example.mvvmcourseapp.data.DTO.UserCodeResponse
 import com.example.mvvmcourseapp.data.DTO.users.UserResponse
 import com.example.mvvmcourseapp.data.DTO.users.UserSettingsResponse
 import com.example.mvvmcourseapp.data.models.UserSettings
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -43,7 +50,7 @@ interface ApiService {
     @GET("user_settings/")
     suspend fun getUserSettings(): Response<List<UserSettingsResponse>>
 
-    @PATCH("user_settings/update")
+    @PATCH("user_settings/update/")
     suspend fun updateUserSettings(@Body body: UpdateSettingsRequest): UserSettingsResponse
 
     @GET("settings/full/")
@@ -80,4 +87,24 @@ interface ApiService {
         @Path("id") id: Int,
         @Body body: UpdateSrsRequest
     ): SrsResponse
+
+    @Multipart
+    @POST("mistakes/files/")
+    suspend fun uploadFile(
+        @Part file: MultipartBody.Part,
+        @Part("language") language: RequestBody
+    ): Response<UserCodeResponse>
+
+    // Шаг 2: Генерация (count передается как ?count=5)
+    @POST("mistakes/files/{id}/generate/")
+    suspend fun generateTasks(
+        @Path("id") fileId: Int,
+        @Query("count") count: Int
+    ): Response<GenerateActionResponse>
+
+    // Шаг 3: Получение списка задач (если нужно обновить список)
+    @GET("mistakes/files/{id}/")
+    suspend fun getFileDetails(
+        @Path("id") fileId: Int
+    ): Response<UserCodeResponse>
 }

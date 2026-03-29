@@ -3,6 +3,9 @@ package com.example.mvvmcourseapp.data.repositories
 import android.util.Log
 import androidx.room.Query
 import com.example.mvvmcourseapp.UIhelper.StatisticsView
+import com.example.mvvmcourseapp.data.DTO.GenerateActionResponse
+import com.example.mvvmcourseapp.data.DTO.GeneratedTaskResponse
+import com.example.mvvmcourseapp.data.DTO.UserCodeResponse
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.Option
@@ -13,6 +16,12 @@ import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.services.ApiService
 import kotlinx.coroutines.flow.Flow
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 class QuizQuestionRepo(
     private val dao: QuizQuestionDao,
@@ -95,9 +104,9 @@ class QuizQuestionRepo(
 
 
 
-    suspend fun getQuizQuestionByCategoryAndLang(category:Category, lang:Lang):List<QuizQuestion>
+    suspend fun getQuizQuestionByCategoryAndLang(category:Category):List<QuizQuestion>
     {
-        return dao.getQuizQuestionByCategoryAndLang(category.id, lang.id)
+        return dao.getQuizQuestionByCategoryAndLang(category.id)
     }
 
     suspend fun questionIsRepeatable(quizQuestion: QuizQuestion, user: User) : Boolean {
@@ -301,6 +310,22 @@ class QuizQuestionRepo(
             dao.clearAllSrsTools()
             dao.insertAllSrsTools(listOfSrs)
         }
+    }
+
+    suspend fun uploadFile(bytes: ByteArray, fileName: String, language: String): Response<UserCodeResponse> {
+        val requestFile = RequestBody.create("text/plain".toMediaTypeOrNull(), bytes)
+        val filePart = MultipartBody.Part.createFormData("file", fileName, requestFile)
+        val langPart = language.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        return api.uploadFile(filePart, langPart)
+    }
+
+    suspend fun generateTasks(fileId: Int, count: Int): Response<GenerateActionResponse> {
+        return api.generateTasks(fileId, count)
+    }
+
+    suspend fun getPracticeTasks(fileId: Int) : Response<UserCodeResponse> {
+       return api.getFileDetails(fileId)
     }
 }
 

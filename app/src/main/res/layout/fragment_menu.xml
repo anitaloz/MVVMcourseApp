@@ -132,6 +132,18 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_practice_menu"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:backgroundTint="@color/purple"
+                android:fontFamily="@font/montserrat_ace_medium"
+                android:text="Практические задания"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:textSize="17sp"
+                app:cornerRadius="14dp" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

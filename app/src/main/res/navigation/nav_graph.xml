@@ -24,6 +24,24 @@
         <action
             android:id="@+id/action_menu_to_statistics"
             app:destination="@id/statisticsFragment"/>
+        <action
+            android:id="@+id/action_menu_to_practice_menu"
+            app:destination="@id/practiceMenuFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/practiceMenuFragment"
+        android:name="com.example.mvvmcourseapp.fragments.PracticeMenuFragment"
+        android:label="PracticeMenu"
+        tools:layout="@layout/fragment_practice_menu">
+
+        <action
+            android:id="@+id/action_practice_menu_to_menu"
+            app:destination="@id/menuFragment" />
+
+        <action
+            android:id="@+id/action_practice_menu_to_practice_quiz"
+            app:destination="@id/practiceQuiz" />
     </fragment>
 
     <fragment
@@ -35,6 +53,21 @@
         <action
             android:id="@+id/action_settings_to_menu"
             app:destination="@id/menuFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/practiceQuiz"
+        android:name="com.example.mvvmcourseapp.fragments.PracticeQuizFragment"
+        android:label="PracticeQuiz"
+        tools:layout="@layout/fragment_practice_quiz">
+
+        <action
+            android:id="@+id/action_practice_quiz_to_practice_menu"
+            app:destination="@id/practiceMenuFragment"/>
+
+        <action
+            android:id="@+id/action_practice_quiz_to_practice_results"
+            app:destination="@id/quizResultFragment" />
     </fragment>
 
 

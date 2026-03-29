@@ -36,14 +36,25 @@ class SharedViewModel(application: Application): ViewModel() {
     private val _questionList= MutableLiveData<List<QuizQuestion>?>()
     val questionList: LiveData<List<QuizQuestion>?> = _questionList
 
-//    private var _index=MutableLiveData<Int?>()
-//    val index:LiveData<Int?> = _index
+    private var _totalSize=MutableLiveData<Int?>()
+    val totalSize:LiveData<Int?> = _totalSize
 
     private var _correctAnswer=MutableLiveData<Int>()
     val correctAnswer:LiveData<Int> = _correctAnswer
 
     private var _wrongAnswer=MutableLiveData<Int>()
     val wrongAnswer:LiveData<Int> = _wrongAnswer
+
+    private val _currentFileId = MutableStateFlow<Int?>(null)
+    val currentFileId: StateFlow<Int?> = _currentFileId
+
+    fun setCurrentFileId(id: Int) {
+        _currentFileId.value = id
+    }
+
+    fun setTotalSize(size: Int) {
+        _totalSize.value = size
+    }
 
     fun setQuestionList(qq:List<QuizQuestion>?)
     {

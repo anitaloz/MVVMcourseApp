@@ -89,16 +89,21 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
 
     suspend fun getUserSettingsByLang(user: User, lang:Int): UserSettings
     {
-        return dao.getUserSettingsByLang(user.id!!, lang)
+        return dao.getUserSettingsByLang(user.id, lang)
     }
 
     suspend fun getUserSettingsAndLangNames(user:User):List<LangLvlView>
     {
         return dao.getUserSettingsAndLangNames(user.id)
     }
-    suspend fun updateUserSettings(user: UpdateSettingsRequest)
+
+    suspend fun updateUserSettingsOnServer(user: UpdateSettingsRequest)
     {
         api.updateUserSettings(user)
+    }
+
+    suspend fun updateUserSettingsOnDb(userSetting : UserSettings) {
+        dao.updateUserSettings(userSetting)
     }
 
 }

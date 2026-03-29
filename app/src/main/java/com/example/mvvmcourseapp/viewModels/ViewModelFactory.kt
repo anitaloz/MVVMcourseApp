@@ -39,15 +39,23 @@ object ViewModelFactory {
         }
 
         initializer {
-            QuizResultViewModel(userRepo, quizQuestionRepo, sharedViewModel)
+            QuizResultViewModel(userRepo, quizQuestionRepo, sharedViewModel, networkUtils)
         }
 
         initializer {
-            SettingsViewModel(userRepo, sessionManager, sharedViewModel)
+            SettingsViewModel(userRepo, sessionManager, sharedViewModel, networkUtils)
         }
 
         initializer {
             StatisticsViewModel(userRepo, sessionManager, sharedViewModel, quizQuestionRepo)
+        }
+
+        initializer {
+            PracticeMenuViewModel(userRepo, sessionManager, sharedViewModel, quizQuestionRepo)
+        }
+
+        initializer {
+            PracticeQuizViewModel(userRepo, sharedViewModel, quizQuestionRepo)
         }
     }
 }

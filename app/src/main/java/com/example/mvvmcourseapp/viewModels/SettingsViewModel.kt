@@ -10,6 +10,7 @@ import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
+import com.example.mvvmcourseapp.utils.NetworkUtils
 import com.example.mvvmcourseapp.viewModels.QuizViewModel.QuizEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -23,6 +24,7 @@ class SettingsViewModel(
     private val userRepo: UserRepo,
     private val sessionManager: SessionManager,
     private val sharedViewModel: SharedViewModel,
+    private val networkUtils: NetworkUtils,
 ): ViewModel()  {
     private val _uiState= MutableStateFlow<SettingsUiState>(SettingsUiState())
     val uiState : StateFlow<SettingsUiState> = _uiState
@@ -64,23 +66,31 @@ class SettingsViewModel(
                     showValidationFeedbackError("Количество новых вопросов должно быть болше 0")
                 else {
                         Log.d("SAVE", "$newQ")
-                        viewModelScope.launch() {
+                        viewModelScope.launch {
                             try {
-//                                val userSettings =
-//                                    userRepo.getUserSettings(sharedViewModel.user.value!!)
-//                                val langs = quizQuestionRepo.getLangs().first()
-
                                 for (u: LangLvlView in langLvlList) {
-                                    userRepo.updateUserSettings(
-                                        UpdateSettingsRequest(
+                                    if (networkUtils.isNetworkAvailable()) {
+                                        userRepo.updateUserSettingsOnServer(
+                                            UpdateSettingsRequest(
+                                                newQ,
+                                                repQ,
+                                                u.lvl,
+                                                u.id
+                                            )
+                                        )
+                                    }
+                                    userRepo.updateUserSettingsOnDb(
+                                        UserSettings(
+                                            u.uid,
+                                            sharedViewModel.user.value?.id!!,
+                                            u.id,
                                             newQ,
                                             repQ,
-                                            u.lvl,
-                                            u.id
+                                            langLvl = u.lvl,
                                         )
                                     )
-
                                 }
+
                             } catch (e: Exception) {
                                 showError(e.message.toString())
                             }

@@ -26,10 +26,12 @@
     <string name="answersCountDefaultText">0</string>
     <string name="button_quiz_to_menu">back to menu button</string>
     <string name="question_order">Вопрос %1$d/%2$d</string>
+    <string name="practice_order">Задание %1$d/%2$d</string>
     <string name="ansCount">0%1$d</string>
     <string name="questionTextDefaultText">How many students in your class _from korea?</string>
     <string name="inPercent">%1$d%%</string>
     <string name="textViewSettings">Настройки</string>
+    <string name="textViewPractice">Практические задания</string>
     <string name="textViewStatistics">Аналитика</string>
     <string name="analyticalPieChartAmount">Всего</string>
     <string-array name="analyticalPieChartColorArray">

@@ -5,40 +5,23 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.mvvmcourseapp.AppContainer
 import com.example.mvvmcourseapp.MVVMcourseApplication
 import com.example.mvvmcourseapp.R
-import com.example.mvvmcourseapp.data.models.MainDb
-import com.example.mvvmcourseapp.UIhelper.LangButton
-import com.example.mvvmcourseapp.UIhelper.ProcessButton
 import com.example.mvvmcourseapp.adapters.LangButtonAdapter
 import com.example.mvvmcourseapp.adapters.ProcessButtonAdapter
-import com.example.mvvmcourseapp.data.models.Category
-import com.example.mvvmcourseapp.data.models.Lang
-import com.example.mvvmcourseapp.data.models.QuizQuestion
-import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
-import com.example.mvvmcourseapp.data.repositories.UserRepo
 import com.example.mvvmcourseapp.databinding.FragmentMenuBinding
 import com.example.mvvmcourseapp.viewModels.MenuViewModel
-import com.example.mvvmcourseapp.viewModels.ViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 
@@ -97,6 +80,10 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             }
         }
 
+        binding.buttonPracticeMenu.setOnClickListener {
+            menuViewModel.navigateToPracticeMenu();
+        }
+
         binding.imbStatistics.setOnClickListener {
             val currentUser = menuViewModel.user.value
             if (currentUser != null) {
@@ -139,6 +126,7 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                         is MenuViewModel.MenuEvent.NavigateToLogin->findNavController().navigate(R.id.action_menu_to_login)
                         is MenuViewModel.MenuEvent.NavigateToSettings->findNavController().navigate(R.id.action_menu_to_settings)
                         is MenuViewModel.MenuEvent.NavigateToStatistics -> findNavController().navigate(R.id.action_menu_to_statistics)
+                        is  MenuViewModel.MenuEvent.NavigateToPracticeMenu -> findNavController().navigate(R.id.action_menu_to_practice_menu)
                     }
                 }
             }
