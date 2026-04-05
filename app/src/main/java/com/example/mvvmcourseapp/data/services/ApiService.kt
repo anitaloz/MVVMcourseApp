@@ -1,5 +1,6 @@
 package com.example.mvvmcourseapp.data.services
 import com.example.mvvmcourseapp.data.DTO.CategoryResponse
+import com.example.mvvmcourseapp.data.DTO.CreateSrsRequest
 import com.example.mvvmcourseapp.data.DTO.GenerateActionResponse
 import com.example.mvvmcourseapp.data.DTO.LangResponse
 import com.example.mvvmcourseapp.data.DTO.LoginRequest
@@ -51,7 +52,7 @@ interface ApiService {
     suspend fun getUserSettings(): Response<List<UserSettingsResponse>>
 
     @PATCH("user_settings/update/")
-    suspend fun updateUserSettings(@Body body: UpdateSettingsRequest): UserSettingsResponse
+    suspend fun updateUserSettings(@Body body: UpdateSettingsRequest): Response<UserSettingsResponse>
 
     @GET("settings/full/")
     suspend fun getSettingsWithLang(): SettingsWithLangResponse
@@ -84,9 +85,14 @@ interface ApiService {
 
     @PATCH("srs/{id}/")
     suspend fun updateSrs(
-        @Path("id") id: Int,
+        @Path("id") id: Long,
         @Body body: UpdateSrsRequest
-    ): SrsResponse
+    ): Response<SrsResponse>
+
+    @POST("srs/")
+    suspend fun createSrsItem(
+        @Body body: CreateSrsRequest
+    ): Response<SrsResponse>
 
     @Multipart
     @POST("mistakes/files/")
@@ -99,12 +105,20 @@ interface ApiService {
     @POST("mistakes/files/{id}/generate/")
     suspend fun generateTasks(
         @Path("id") fileId: Int,
-        @Query("count") count: Int
+        @Query("count") count: Int,
+        @Query("difficulty") difficulty: Int,
     ): Response<GenerateActionResponse>
 
     // Шаг 3: Получение списка задач (если нужно обновить список)
     @GET("mistakes/files/{id}/")
     suspend fun getFileDetails(
         @Path("id") fileId: Int
+    ): Response<UserCodeResponse>
+
+    @GET("mistakes/tasks")
+    suspend fun getTasksWithoutFile(
+        @Query("count") count: Int,
+        @Query("difficulty") difficulty: Int,
+        @Query("lang_id") langId: Int,
     ): Response<UserCodeResponse>
 }

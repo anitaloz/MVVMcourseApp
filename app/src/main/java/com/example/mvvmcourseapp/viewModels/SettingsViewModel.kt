@@ -19,12 +19,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsViewModel(
     private val userRepo: UserRepo,
     private val sessionManager: SessionManager,
     private val sharedViewModel: SharedViewModel,
     private val networkUtils: NetworkUtils,
+    private val quizQuestionRepo: QuizQuestionRepo,
 ): ViewModel()  {
     private val _uiState= MutableStateFlow<SettingsUiState>(SettingsUiState())
     val uiState : StateFlow<SettingsUiState> = _uiState
@@ -69,17 +71,7 @@ class SettingsViewModel(
                         viewModelScope.launch {
                             try {
                                 for (u: LangLvlView in langLvlList) {
-                                    if (networkUtils.isNetworkAvailable()) {
-                                        userRepo.updateUserSettingsOnServer(
-                                            UpdateSettingsRequest(
-                                                newQ,
-                                                repQ,
-                                                u.lvl,
-                                                u.id
-                                            )
-                                        )
-                                    }
-                                    userRepo.updateUserSettingsOnDb(
+                                    userRepo.updateUserSettings(
                                         UserSettings(
                                             u.uid,
                                             sharedViewModel.user.value?.id!!,
@@ -110,11 +102,29 @@ class SettingsViewModel(
     }
 
     fun logout() {
-        sessionManager.logout()
-        sharedViewModel.setUser(null)
-        Log.d("USER_SETTINGS", sharedViewModel.user.value.toString())
-        navigateToMenu()
+        viewModelScope.launch {
+            if (networkUtils.isNetworkAvailable()) {
+                quizQuestionRepo.synchroniseSrsTools()
+                userRepo.synchronizeUserSettings(sharedViewModel.user.value?.id!!)
+            } else {
+                showValidationFeedbackError("Отсутствует подключение к интернету, данные не будут сохранены")
+            } // TODO: В ИДЕАЛЕ ДОБАВИТ КНОПКУ ПОДТВЕРЖДЕНИЯ ИЛИ ВТОРОЙ РАЗ НАЖИМТ НА ВЫХОД или модалку
+            withContext(Dispatchers.Main) {
+                sessionManager.logout()
+                sharedViewModel.setUser(null)
+                viewModelScope.launch {
+                    quizQuestionRepo.deleteSrsTools()
+                    userRepo.deleteUserDataFromRoom()
+                }
+                navigateToLogin()
+            }
+        }
     }
+    fun navigateToLogin()
+    {
+        sendEvent(SettingsEvent.NavigateToLogin)
+    }
+
     fun navigateToMenu()
     {
         sendEvent(SettingsEvent.NavigateToMenu)
@@ -142,6 +152,7 @@ class SettingsViewModel(
 
     sealed class SettingsEvent{
         object NavigateToMenu: SettingsEvent()
+        object NavigateToLogin: SettingsEvent()
         data class ShowError(val error:String): SettingsEvent()
         data class ShowValidationFeedbackSuccess(val state:String):SettingsEvent()
         data class ShowValidationFeedbackError(val state:String):SettingsEvent()

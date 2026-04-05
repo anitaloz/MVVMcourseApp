@@ -35,15 +35,15 @@ object ViewModelFactory {
         }
 
         initializer {
-            LoginViewModel(userRepo, sharedViewModel)
+            LoginViewModel(userRepo, quizQuestionRepo, sharedViewModel)
         }
 
         initializer {
-            QuizResultViewModel(userRepo, quizQuestionRepo, sharedViewModel, networkUtils)
+            QuizResultViewModel(userRepo, quizQuestionRepo, sharedViewModel)
         }
 
         initializer {
-            SettingsViewModel(userRepo, sessionManager, sharedViewModel, networkUtils)
+            SettingsViewModel(userRepo, sessionManager, sharedViewModel, networkUtils, quizQuestionRepo)
         }
 
         initializer {

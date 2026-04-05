@@ -10,6 +10,7 @@ import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
 import com.example.mvvmcourseapp.data.services.ApiService
 import com.example.mvvmcourseapp.data.services.AuthInterceptor
+import com.example.mvvmcourseapp.data.services.TokenAuthenticator
 import com.example.mvvmcourseapp.utils.NetworkUtils
 import com.example.mvvmcourseapp.viewModels.SharedViewModel
 import com.example.mvvmcourseapp.viewModels.ViewModelFactory
@@ -25,10 +26,10 @@ class MVVMcourseApplication: Application() {
 }
 
 class AppContainer(private val application: Application, private val db: MainDb) {
-    val quizQuestionRepo: QuizQuestionRepo by lazy { QuizQuestionRepo(db.getQuizQuestionDao(), api) }
+    val quizQuestionRepo: QuizQuestionRepo by lazy { QuizQuestionRepo(db.getQuizQuestionDao(), api, networkUtils) }
     val sessionManager: SessionManager by lazy { SessionManager(application) }
 
-    val userRepo: UserRepo by lazy { UserRepo(db.getDao(), api, sessionManager) }
+    val userRepo: UserRepo by lazy { UserRepo(db.getDao(), api, sessionManager, networkUtils) }
 
     val sharedViewModel: SharedViewModel by lazy {
         val factory = viewModelFactory {
@@ -43,10 +44,16 @@ class AppContainer(private val application: Application, private val db: MainDb)
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    private val tokenAuthenticator by lazy {
+        TokenAuthenticator(application, sessionManager, BASE_URL)
+    }
+
     private val client = OkHttpClient.Builder()
         .addInterceptor(AuthInterceptor(sessionManager))
         .addInterceptor(logging)
+        .authenticator(tokenAuthenticator)
         .build()
+
 
 
     private val api: ApiService by lazy {

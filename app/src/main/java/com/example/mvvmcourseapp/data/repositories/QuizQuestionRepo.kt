@@ -1,10 +1,15 @@
 package com.example.mvvmcourseapp.data.repositories
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.room.Query
 import com.example.mvvmcourseapp.UIhelper.StatisticsView
+import com.example.mvvmcourseapp.data.DTO.CreateSrsRequest
 import com.example.mvvmcourseapp.data.DTO.GenerateActionResponse
 import com.example.mvvmcourseapp.data.DTO.GeneratedTaskResponse
+import com.example.mvvmcourseapp.data.DTO.SrsResponse
+import com.example.mvvmcourseapp.data.DTO.UpdateSrsRequest
 import com.example.mvvmcourseapp.data.DTO.UserCodeResponse
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
@@ -15,17 +20,23 @@ import com.example.mvvmcourseapp.data.models.SRSTools
 import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.services.ApiService
+import com.example.mvvmcourseapp.utils.NetworkUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 class QuizQuestionRepo(
     private val dao: QuizQuestionDao,
     private val api: ApiService,
+    private val networkUtils: NetworkUtils,
 )
 {
     fun filter (s:String): Flow<List<QuizQuestionDao.CategoryFilter>>
@@ -220,7 +231,6 @@ class QuizQuestionRepo(
 
     suspend fun updateSrsTools(srsTools: SRSTools, q:Int)
     {
-
         var interval=srsTools.interval
         val EF=srsTools.EF
         if(srsTools.n==1)
@@ -231,14 +241,71 @@ class QuizQuestionRepo(
         var EFnew=EF+(0.1-(3-q)*(0.08+(3-q)*0.02))
         if(EFnew<1.3) EFnew=1.3
         val newsrs = if(q!=0) SRSTools(srsTools.id, EFnew, srsTools.n+1,
-            interval, System.currentTimeMillis(), srsTools.qqId, srsTools.userId)
+            interval, System.currentTimeMillis(), srsTools.qqId, srsTools.userId, isDirty = true)
         else SRSTools(srsTools.id, EFnew, 1, 1, System.currentTimeMillis(),
             srsTools.qqId, srsTools.userId)
-        dao.updateSrsTools(newsrs)
+
+        if (networkUtils.isNetworkAvailable()) {
+            try {
+                val response = api.updateSrs(newsrs.id!!, UpdateSrsRequest(
+                    newsrs.EF,
+                    newsrs.n,
+                    newsrs.interval,
+                    newsrs.lastReviewDate
+                ))
+
+                if (response.isSuccessful) {
+                    dao.updateSrsTools(newsrs.copy(isDirty = false))
+                }
+            } catch (e: Exception) {
+                Log.d("ERROR SERVER", e.message.toString())
+            }
+        }
+        else {
+            dao.updateSrsTools(newsrs.copy(isDirty = true))
+        }
     }
 
-    suspend fun insertSrsTools(srsTools: SRSTools) {
-        dao.insertSrsTools(srsTools)
+    suspend fun insertSrsTools(ef: Double, n: Int, interval: Int,lastReviewDate: Long, qqId: Int, userId: Int) {
+        if (networkUtils.isNetworkAvailable()) {
+            val response = api.createSrsItem(CreateSrsRequest(
+                qqId,
+                ef,
+                n,
+                interval,
+                lastReviewDate
+            ))
+
+            if (response.isSuccessful && response.body() != null) {
+                val serverData = response.body()!!
+
+                dao.insertSrsTools(
+                    SRSTools(
+                        null,
+                        ef,
+                        n,
+                        interval,
+                        lastReviewDate,
+                        qqId,
+                        userId,
+                        serverId = serverData.id,
+                    )
+                )
+            }
+        } else {
+            dao.insertSrsTools(
+                SRSTools(
+                    null,
+                    ef,
+                    n,
+                    interval,
+                    lastReviewDate,
+                    qqId,
+                    userId,
+                    isDirty = true,
+                )
+            )
+        }
     }
 
     suspend fun refreshCategories() {
@@ -299,19 +366,132 @@ class QuizQuestionRepo(
         }
     }
 
-    suspend fun refreshSrsTools() {
-        val response = api.getSrs()
+    suspend fun refreshSrsToolsWhenUserChanged() {
+        if (!networkUtils.isNetworkAvailable()) return
 
-        if (response.isSuccessful) {
-            val srsToolsFromServer = response.body() ?: emptyList()
-            val listOfSrs = srsToolsFromServer.map {
-                it.toSrs()
+        try {
+            val response = api.getSrs()
+
+            if (response.isSuccessful) {
+                val srsToolsFromServer = response.body() ?: emptyList()
+                val listOfSrs = srsToolsFromServer.map {
+                    it.toSrs()
+                }
+                dao.clearAllSrsTools()
+                dao.insertAllSrsTools(listOfSrs)
             }
-            dao.clearAllSrsTools()
-            dao.insertAllSrsTools(listOfSrs)
+        }
+        catch (e: Exception) {
+            Log.e("REFRESHING SRS ERROR", e.message.toString())
         }
     }
 
+    suspend fun deleteSrsTools() {
+        dao.clearAllSrsTools()
+    }
+
+    // Добавьте withContext(Dispatchers.IO) в начало метода
+    suspend fun synchroniseSrsTools() = withContext(Dispatchers.IO) {
+        if (!networkUtils.isNetworkAvailable()) return@withContext
+
+        try {
+            val response = api.getSrs()
+            if (!response.isSuccessful) return@withContext
+
+            val serverTools = response.body() ?: emptyList()
+            val localTools = dao.getAllSrsTools()
+
+            val localToolsMap = localTools.associateBy { it.serverId }
+            val serverToolsMap = serverTools.associateBy { it.id }
+
+            // Синхронизация dirty записей (локальные изменения -> сервер)
+            localTools.filter { it.isDirty }.forEach { localTool ->
+                try {
+                    val updateResponse = api.updateSrs(
+                        localTool.id!!,
+                        UpdateSrsRequest(
+                            localTool.EF,
+                            localTool.n,
+                            localTool.interval,
+                            localTool.lastReviewDate
+                        )
+                    )
+
+                    if (updateResponse.isSuccessful) {
+                        dao.updateSrsTools(localTool.copy(isDirty = false))
+                        Log.d("SYNC", "Successfully synced SRS tool ${localTool.id}")
+                    } else {
+                        Log.e("SYNC", "Failed to update tool ${localTool.id}: ${updateResponse.code()}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("SYNC", "Network error while updating tool ${localTool.id}", e)
+                    // Не снимаем dirty флаг при ошибке сети
+                }
+            }
+
+            // Подготовка к обновлению локальной БД из сервера
+            val toolsToUpdate = mutableListOf<SRSTools>()
+            val toolsToInsert = mutableListOf<SRSTools>()
+
+            serverTools.forEach { serverTool ->
+                val localTool = localToolsMap[serverTool.id]
+
+                when {
+                    localTool == null -> {
+                        // Новый инструмент на сервере - добавляем
+                        toolsToInsert.add(
+                            SRSTools(
+                                serverId = serverTool.id,
+                                EF = serverTool.ef,
+                                n = serverTool.repetition_count,
+                                interval = serverTool.interval,
+                                lastReviewDate = serverTool.last_review_date,
+                                isDirty = false,
+                                id = null,
+                                qqId = serverTool.question,
+                                userId = serverTool.user,
+                            )
+                        )
+                    }
+                    !localTool.isDirty -> {
+                        // Локальный инструмент не изменялся - обновляем из сервера
+                        toolsToUpdate.add(
+                            localTool.copy(
+                                EF = serverTool.ef,
+                                n = serverTool.repetition_count,
+                                interval = serverTool.interval,
+                                lastReviewDate = serverTool.last_review_date,
+                                isDirty = false
+                            )
+                        )
+                    }
+                    // Если localTool.isDirty == true, оставляем локальную версию (конфликт в пользу локальных данных)
+                }
+            }
+
+            // Удаляем инструменты, которых нет на сервере (только если они не dirty)
+            val toolsToDelete = localTools.filter {
+                it.serverId != null && !serverToolsMap.containsKey(it.serverId) && !it.isDirty
+            }
+
+            // Применяем все изменения в одной транзакции
+            if (toolsToInsert.isNotEmpty() || toolsToUpdate.isNotEmpty() || toolsToDelete.isNotEmpty()) {
+                dao.runInTransaction {
+                    toolsToInsert.forEach { dao.insertSrsTools(it) }
+                    toolsToUpdate.forEach { dao.updateSrsTools(it) }
+                    toolsToDelete.forEach { dao.deleteSrsTool(it) }
+                }
+
+                Log.d("SYNC", "SRS Sync completed: inserted=${toolsToInsert.size}, " +
+                        "updated=${toolsToUpdate.size}, deleted=${toolsToDelete.size}")
+            } else {
+                Log.d("SYNC", "No SRS changes needed")
+            }
+
+        } catch (e: Exception) {
+            Log.e("SYNC", "SRS Synchronization failed", e)
+        }
+    }
     suspend fun uploadFile(bytes: ByteArray, fileName: String, language: String): Response<UserCodeResponse> {
         val requestFile = RequestBody.create("text/plain".toMediaTypeOrNull(), bytes)
         val filePart = MultipartBody.Part.createFormData("file", fileName, requestFile)
@@ -320,12 +500,20 @@ class QuizQuestionRepo(
         return api.uploadFile(filePart, langPart)
     }
 
-    suspend fun generateTasks(fileId: Int, count: Int): Response<GenerateActionResponse> {
-        return api.generateTasks(fileId, count)
+    suspend fun generateTasks(fileId: Int, count: Int, difficulty: Int): Response<GenerateActionResponse> {
+        return api.generateTasks(fileId, count, difficulty)
+    }
+
+    suspend fun getTasksWithoutFile(fileId: Int, count: Int, difficulty: Int): Response<GenerateActionResponse> {
+        return api.generateTasks(fileId, count, difficulty)
     }
 
     suspend fun getPracticeTasks(fileId: Int) : Response<UserCodeResponse> {
        return api.getFileDetails(fileId)
+    }
+
+    suspend fun getPracticeTasks(difficulty: Int, count: Int, langId: Int) : Response<UserCodeResponse> {
+        return api.getTasksWithoutFile(difficulty = difficulty, count = count, langId = langId)
     }
 }
 

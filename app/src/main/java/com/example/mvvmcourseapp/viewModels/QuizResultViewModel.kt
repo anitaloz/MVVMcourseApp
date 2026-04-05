@@ -22,7 +22,6 @@ class QuizResultViewModel(
     private val userRepo: UserRepo,
     private val quizQuestionRepo: QuizQuestionRepo,
     private val sharedViewModel: SharedViewModel,
-    private val networkUtils: NetworkUtils,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ResultUiState())
@@ -41,29 +40,26 @@ class QuizResultViewModel(
                         sharedViewModel.user.value!!,
                         sharedViewModel.category.value!!.langId
                     )
+
                     if (sharedViewModel.correctAnswer.value!! <= 6) {
                         userSettings.langLvl = 1
                     }
+
                     if (sharedViewModel.correctAnswer.value!! <= 12 && sharedViewModel.correctAnswer.value!! > 6) {
                         userSettings.langLvl = 2
                     }
+
                     if (sharedViewModel.correctAnswer.value!! <= 15 && sharedViewModel.correctAnswer.value!! > 12) {
                         userSettings.langLvl = 3
                     }
-                    if (networkUtils.isNetworkAvailable()) {
-                        userRepo.updateUserSettingsOnServer(
-                            UpdateSettingsRequest(
-                                userSettings.newQ,
-                                userSettings.maxRepQuestions,
-                                userSettings.langLvl,
-                                userSettings.langId
-                            )
-                        )
-                    }
 
-                    userRepo.updateUserSettingsOnDb(
-                        userSettings
-                    )
+                    try {
+                        userRepo.updateUserSettings(
+                            userSettings
+                        )
+                    } catch (e: Exception) {
+                        showError(e.toString())
+                    }
 
                     withContext(Dispatchers.Main)
                     {

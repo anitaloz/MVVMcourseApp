@@ -64,7 +64,6 @@ class PracticeMenuFragment : Fragment(R.layout.fragment_practice_menu) {
     }
 
     private fun setupUI() {
-        // Инициализируем пустой адаптер
         spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, mutableListOf<String>())
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinner.adapter = spinnerAdapter
@@ -73,7 +72,6 @@ class PracticeMenuFragment : Fragment(R.layout.fragment_practice_menu) {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedLangName = spinnerAdapter.getItem(position)
                 selectedLangName?.let {
-                    // ПЕРЕДАЕМ В VIEWMODEL
                     practiceMenuViewModel.onLangSelected(it)
                 }
             }
@@ -81,8 +79,6 @@ class PracticeMenuFragment : Fragment(R.layout.fragment_practice_menu) {
         }
 
         binding.buttonDownloadCode.setOnClickListener {
-            // Теперь выбор файла просто запускает процесс,
-            // а ViewModel сама возьмет язык и сложность из своего State
             selectFileLauncher.launch("text/*")
         }
 

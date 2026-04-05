@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mvvmcourseapp.data.DTO.GeneratedTaskResponse
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
 import com.example.mvvmcourseapp.data.models.MainDb
@@ -35,6 +36,9 @@ class SharedViewModel(application: Application): ViewModel() {
 
     private val _questionList= MutableLiveData<List<QuizQuestion>?>()
     val questionList: LiveData<List<QuizQuestion>?> = _questionList
+
+    private val _listOfTasks = MutableLiveData<List<GeneratedTaskResponse>>()
+    val listOfTasks: LiveData<List<GeneratedTaskResponse>> = _listOfTasks
 
     private var _totalSize=MutableLiveData<Int?>()
     val totalSize:LiveData<Int?> = _totalSize

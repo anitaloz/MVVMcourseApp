@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.mvvmcourseapp.UIhelper.LangLvlView
 import com.example.mvvmcourseapp.data.models.Lang
@@ -14,6 +15,17 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface Dao {
+    @Transaction
+    suspend fun runInTransaction(block: suspend () -> Unit) {
+        block()
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserSettings(settings: UserSettings)
+
+    @Delete
+    suspend fun deleteUserSettings(settings: UserSettings)
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun addUser(user: User)
 
@@ -22,6 +34,9 @@ interface Dao {
 
     @Query("SELECT * FROM users")
     fun getAllUsers(): Flow<List<User>>
+
+    @Query("SELECT * FROM users LIMIT 1")
+    fun getMe(): User
 
     @Query("SELECT * FROM users WHERE login = :login LIMIT 1")
     suspend fun getUserByLogin(login: String): User?
@@ -47,6 +62,23 @@ interface Dao {
     @Query("DELETE FROM user_settings")
     suspend fun clearUserSettings()
 
+    @Query("DELETE FROM users")
+    suspend fun clearUsers()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllUserSettings(settings: List<UserSettings>)
+
+    @Delete
+    suspend fun deleteAll(settings: List<UserSettings>)
+
+    @Transaction
+    suspend fun batchUpdate(
+        toInsert: List<UserSettings>,
+        toUpdate: List<UserSettings>,
+        toDelete: List<UserSettings>
+    ) {
+        if (toInsert.isNotEmpty()) insertAllUserSettings(toInsert)
+        if (toInsert.isNotEmpty()) insertAllUserSettings(toInsert)
+        if (toDelete.isNotEmpty()) deleteAll(toDelete)
+    }
 }

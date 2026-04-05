@@ -4,7 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.mvvmcourseapp.data.models.Category
 import com.example.mvvmcourseapp.data.models.Lang
@@ -15,8 +17,16 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface QuizQuestionDao {
+    @Transaction
+    suspend fun runInTransaction(block: suspend () -> Unit) {
+        block()
+    }
+
     @Query("SELECT * FROM quiz_questions")
     fun getAllQuestions(): Flow<List<QuizQuestion>>
+
+    @Query("SELECT * FROM srs_tools")
+    fun getAllSrsTools() : List<SRSTools>
 
     @Query("SELECT EXISTS(SELECT * FROM quiz_questions LIMIT 1)")
     suspend fun isNotEmptyQuestions(): Boolean
@@ -311,8 +321,11 @@ interface QuizQuestionDao {
     @Insert
     suspend fun insertCategories(category: Category)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSrsTools(srsTools: SRSTools)
+
+    @Delete
+    suspend fun deleteSrsTool(tool: SRSTools)
 
     @Insert
     suspend fun insertAllSrsTools(srsTools: List<SRSTools>)

@@ -84,6 +84,8 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
                         is SettingsViewModel.SettingsEvent.ShowValidationFeedbackError -> {
                             showFeedbackWithAnimation(R.drawable.error_background_modern, event.state)
                         }
+
+                        is SettingsViewModel.SettingsEvent.NavigateToLogin -> findNavController().navigate(R.id.action_settings_to_login)
                     }
 
                 }

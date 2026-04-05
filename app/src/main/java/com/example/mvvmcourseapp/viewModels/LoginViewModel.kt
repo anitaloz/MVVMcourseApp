@@ -5,6 +5,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.mvvmcourseapp.SessionManager
 import com.example.mvvmcourseapp.data.models.User
+import com.example.mvvmcourseapp.data.repositories.QuizQuestionRepo
 import com.example.mvvmcourseapp.data.repositories.UserRepo
 import com.example.mvvmcourseapp.viewModels.AuthViewModel.AuthEvent
 import com.example.mvvmcourseapp.viewModels.SettingsViewModel.SettingsEvent
@@ -18,6 +19,7 @@ import kotlinx.coroutines.withContext
 
 class LoginViewModel(
     private val userRepo: UserRepo,
+    private val quizQuestionRepo: QuizQuestionRepo,
     private val sharedViewModel: SharedViewModel
 ) : ViewModel()
 {
@@ -41,25 +43,22 @@ class LoginViewModel(
                 }
 
                 // 2. Получаем текущего пользователя с сервера
-                val userResponse = userRepo.getCurrentUser()
+                val user = userRepo.getCurrentUser()
 
                 // 3. Кладём в SharedViewModel
                 sharedViewModel.setUser(
-                    User(
-                        id = userResponse.id,
-                        login = userResponse.login,
-                        email = userResponse.email,
-                        pass = "" // пароль не нужен
-                    )
+                    user
                 )
 
                 // 4. Навигация
-                sendEvent(LoginEvent.showToast("Добро пожаловать, ${userResponse.login}!"))
+                sendEvent(LoginEvent.showToast("Добро пожаловать, ${user.login}!"))
+                quizQuestionRepo.refreshSrsToolsWhenUserChanged()
+                userRepo.synchronizeUserSettings(sharedViewModel.user.value?.id!!)
                 navigateToMenu()
 
             } catch (e: Exception) {
                 //sendEvent(LoginEvent.showToast("Ошибка: ${e.message}"))
-                showValidationFeedbackError("Неверное имя пользователя или пароль")
+                showValidationFeedbackError(e.message.toString())
             }
         }
     }

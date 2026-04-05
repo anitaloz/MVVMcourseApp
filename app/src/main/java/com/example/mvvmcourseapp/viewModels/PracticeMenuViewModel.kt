@@ -56,7 +56,13 @@ class PracticeMenuViewModel(
 
     fun uploadAndGenerate() {
         val state = uiState.value
-        val bytes = state.selectedFileBytes ?: return // Если файл не выбран, выходим
+        val bytes = state.selectedFileBytes
+
+        if (bytes == null){
+            sharedViewModel.setCurrentFileId(-1)
+            navigateToPracticeQuiz()
+            return // Если файл не выбран, выходим
+        }
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -71,11 +77,14 @@ class PracticeMenuViewModel(
 
                 if (uploadResponse.isSuccessful) {
                     val fileId = uploadResponse.body()?.id ?: return@launch
+                    val lang = quizQuestionRepo.getLangByLangName(state.selectedLang)
+                    val userSettings = userRepo.getUserSettingsByLang(user = userRepo.getCurrentUser(), lang.id)
 
                     // 2. Сразу запускаем генерацию для этого ID
                     val genResponse = quizQuestionRepo.generateTasks(
                         fileId = fileId,
-                        count = state.taskCount
+                        count = state.taskCount,
+                        difficulty = userSettings.langLvl,
                     )
 
                     if (genResponse.isSuccessful) {

@@ -25,8 +25,27 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainer) as NavHostFragment
         navController = navHostFragment.navController
+
+        setupNavigation()
     }
 
+    private fun setupNavigation() {
+        val isLoggedIn = sessionManager.isLoggedIn()
+
+        // Получаем навигационный граф
+        val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
+
+        if (isLoggedIn) {
+            // Если авторизован - стартуем с MenuFragment
+            navGraph.setStartDestination(R.id.menuFragment)
+        } else {
+            // Если не авторизован - стартуем с LoginFragment
+            navGraph.setStartDestination(R.id.loginFragment)
+        }
+
+        // Устанавливаем граф
+        navController.setGraph(navGraph, null)
+    }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()

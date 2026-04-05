@@ -13,8 +13,12 @@ import com.example.mvvmcourseapp.data.models.User
 import com.example.mvvmcourseapp.data.dao.Dao
 import com.example.mvvmcourseapp.data.models.UserSettings
 import com.example.mvvmcourseapp.data.services.ApiService
+import com.example.mvvmcourseapp.utils.NetworkUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.collections.filter
 
-class UserRepo(private val dao: Dao, private val api: ApiService, private val sessionManager: SessionManager)
+class UserRepo(private val dao: Dao, private val api: ApiService, private val sessionManager: SessionManager, private val networkUtils : NetworkUtils)
 {
     suspend fun login(login: String, password: String): Boolean {
         val response = api.login(LoginRequest(login, password))
@@ -28,22 +32,95 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
         return true
     }
 
-    suspend fun getCurrentUser(): UserResponse {
-        return api.getMe().body()!!
+    suspend fun getCurrentUser(): User {
+        return if (networkUtils.isNetworkAvailable()) {
+            api.getMe().body()!!.toUser()
+        } else {
+            withContext(Dispatchers.IO) {
+                dao.getMe()
+            }
+        }
     }
 
-    suspend fun refreshUserSettings() {
-        val response = api.getUserSettings()
+    suspend fun synchronizeUserSettings(userId: Int) {
+        if (!networkUtils.isNetworkAvailable()) return
 
-        if (response.isSuccessful) {
-            Log.e("USERsettings", response.body().toString())
-            val settingsFromServer = response.body() ?: emptyList()
-            val listOfSettings = settingsFromServer.map {
-                it.toUserSettings()
+        try {
+            // Все операции с БД выполняем на IO потоке
+            val response = withContext(Dispatchers.IO) {
+                api.getUserSettings() // API вызов
             }
-            Log.d("USERSETTINGSENTITY", listOfSettings.toString())
-            dao.clearUserSettings()
-            dao.insertAllUserSettings(listOfSettings)
+
+            if (!response.isSuccessful) {
+                Log.e("SYNC", "Failed to get settings from server: ${response.code()}")
+                return
+            }
+
+            val settingsFromServer = response.body() ?: emptyList()
+
+            // Операции с БД на IO потоке
+            val localSettings = withContext(Dispatchers.IO) {
+                dao.getUserSettings(userId)
+            }
+
+            // Обработка dirty настроек
+            val dirtySettings = localSettings.filter { it.isDirty }
+
+            if (dirtySettings.isNotEmpty()) {
+                dirtySettings.forEach { setting ->
+                    try {
+                        val updateResponse = withContext(Dispatchers.IO) {
+                            api.updateUserSettings(
+                                UpdateSettingsRequest(
+                                    setting.newQ,
+                                    setting.maxRepQuestions,
+                                    setting.langLvl,
+                                    setting.langId
+                                )
+                            )
+                        }
+
+                        if (updateResponse.isSuccessful) {
+                            withContext(Dispatchers.IO) {
+                                dao.updateUserSettings(setting.copy(isDirty = false))
+                            }
+                            Log.d("SYNC", "Successfully synced setting ${setting.id}")
+                        } else {
+                            Log.e("SYNC", "Failed to sync setting ${setting.id}: ${updateResponse.code()}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("SYNC", "Error syncing setting ${setting.id}", e)
+                    }
+                }
+            }
+
+            // Обновляем локальные данные
+            val settingsToInsert = settingsFromServer.map { serverSetting ->
+                UserSettings(
+                    id = null,
+                    newQ = serverSetting.new_questions,
+                    maxRepQuestions = serverSetting.max_rep_questions,
+                    langLvl = serverSetting.lang_lvl,
+                    langId = serverSetting.lang,
+                    isDirty = false,
+                    userId = serverSetting.user,
+                )
+            }
+
+            // Применяем изменения в транзакции на IO потоке
+            if (settingsToInsert.isNotEmpty()) {
+                withContext(Dispatchers.IO) {
+                    dao.runInTransaction {
+                        settingsToInsert.forEach { dao.insertUserSettings(it) }
+                    }
+                }
+                Log.d("SYNC", "Sync completed: inserted=${settingsToInsert.size}")
+            } else {
+                Log.d("SYNC", "No changes needed")
+            }
+
+        } catch (e: Exception) {
+            Log.e("SYNC", "Failed to synchronize user settings", e)
         }
     }
 
@@ -67,8 +144,6 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
             false
         }
     }
-
-
 
 //    suspend fun login(login:String, pass:String) :Boolean {
 //        val userFromDb=dao.getUserByLogin(login)
@@ -97,13 +172,25 @@ class UserRepo(private val dao: Dao, private val api: ApiService, private val se
         return dao.getUserSettingsAndLangNames(user.id)
     }
 
-    suspend fun updateUserSettingsOnServer(user: UpdateSettingsRequest)
+    suspend fun updateUserSettings(userSettings: UserSettings)
     {
-        api.updateUserSettings(user)
+        if (networkUtils.isNetworkAvailable()) {
+            api.updateUserSettings(
+                UpdateSettingsRequest(
+                    userSettings.newQ,
+                    userSettings.maxRepQuestions,
+                    userSettings.langLvl,
+                    userSettings.langId
+                )
+            )
+            dao.updateUserSettings(userSettings.copy(isDirty = false))
+        } else {
+            dao.updateUserSettings(userSettings.copy(isDirty = true))
+        }
     }
 
-    suspend fun updateUserSettingsOnDb(userSetting : UserSettings) {
-        dao.updateUserSettings(userSetting)
+    suspend fun deleteUserDataFromRoom() {
+        dao.clearUserSettings()
+        dao.clearUsers()
     }
-
 }

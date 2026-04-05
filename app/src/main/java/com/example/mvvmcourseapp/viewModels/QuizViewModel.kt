@@ -18,6 +18,7 @@ import com.example.mvvmcourseapp.adapters.OptionItemAdapter
 import com.example.mvvmcourseapp.data.models.Option
 import com.example.mvvmcourseapp.data.models.QuizQuestion
 import com.example.mvvmcourseapp.data.models.SRSTools
+import com.example.mvvmcourseapp.utils.NetworkUtils
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,13 +31,13 @@ import kotlinx.coroutines.withContext
 class QuizViewModel(
     private val userRepo: UserRepo,
     private val quizQuestionRepo: QuizQuestionRepo,
-    private val sharedViewModel: SharedViewModel
-): ViewModel() {
+    private val sharedViewModel: SharedViewModel,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(QuizUiState())
     val uiState: StateFlow<QuizUiState> = _uiState
 
-    private val _events= Channel<QuizEvent>()
+    private val _events = Channel<QuizEvent>()
     val events = _events.receiveAsFlow()
 
     private var questions: List<QuizQuestion> = emptyList()
@@ -46,7 +47,7 @@ class QuizViewModel(
         loadQuestions(currentQuestionIndex)
     }
 
-    fun loadQuestions(index:Int) {
+    fun loadQuestions(index: Int) {
         questions = sharedViewModel.questionList.value ?: emptyList()
         //currentQuestionIndex = sharedViewModel.index.value ?: 0
 
@@ -85,7 +86,12 @@ class QuizViewModel(
         }
     }
 
-    fun onOptionSelected(optionIndex: Int, optionItem: OptionItem, time:Int, question: QuizQuestion=questions[currentQuestionIndex]) {
+    fun onOptionSelected(
+        optionIndex: Int,
+        optionItem: OptionItem,
+        time: Int,
+        question: QuizQuestion = questions[currentQuestionIndex]
+    ) {
         if (_uiState.value.isDelayActive) return
 
         // Блокируем дальнейшие клики
@@ -97,7 +103,7 @@ class QuizViewModel(
 
         // Обновляем счет
         //ЛОГИКА SPACED REPETITION если вопрос из новых неповторяемых, то новая запись в SRSTools иначе update по формуле
-        if(sharedViewModel.category.value?.categoryName!="Тест на определение уровня") {
+        if (sharedViewModel.category.value?.categoryName != "Тест на определение уровня") {
             var timer: Int = 0
             if (optionItem.option.correct) {
                 var corrAns = _uiState.value.correctAns.toInt()
@@ -108,7 +114,6 @@ class QuizViewModel(
                         timer = 2
                     else timer = 1
                 }
-                //Log.d("TTTTTTTTTTTTTTTT", "${_uiState.value.repetitions}")
                 if (_uiState.value.questionNumber <= _uiState.value.totalQuestions - _uiState.value.repetitions) {
                     sharedViewModel.setCorrectAnswer(corrAns + 1)
                     corrAns += 1
@@ -126,21 +131,18 @@ class QuizViewModel(
                             )
                         } else {
                             quizQuestionRepo.insertSrsTools(
-                                SRSTools(
-                                    null,
-                                    2.5,
-                                    1,
-                                    1,
-                                    System.currentTimeMillis(),
-                                    question.id,
-                                    sharedViewModel.user.value?.id!!
-                                )
+                                2.5,
+                                1,
+                                1,
+                                System.currentTimeMillis(),
+                                question.id,
+                                sharedViewModel.user.value?.id!!
                             )
                         }
                     }
                 }
                 //_uiState.value=_uiState.value.copy(correctAns = sharedViewModel.correctAnswer.value!!)
-                _uiState.value =  _uiState.value.copy(correctAns = stringScoreDisplay(corrAns))
+                _uiState.value = _uiState.value.copy(correctAns = stringScoreDisplay(corrAns))
             } else {
                 //sharedViewModel.addQuestiontoQuiestionList(_uiState.value.currentQuestion!!)
                 questions = questions + _uiState.value.currentQuestion!!
@@ -163,15 +165,12 @@ class QuizViewModel(
                             )
                         } else {
                             quizQuestionRepo.insertSrsTools(
-                                SRSTools(
-                                    null,
-                                    2.5,
-                                    1,
-                                    1,
-                                    System.currentTimeMillis(),
-                                    question.id,
-                                    sharedViewModel.user.value?.id!!
-                                )
+                                2.5,
+                                1,
+                                1,
+                                System.currentTimeMillis(),
+                                question.id,
+                                sharedViewModel.user.value?.id!!
                             )
                         }
                     }
@@ -182,15 +181,13 @@ class QuizViewModel(
                     _uiState.value.copy(wrongAns = stringScoreDisplay(wrongAns), repetitions = rep)
 
             }
-        }
-        else {
+        } else {
             if (optionItem.option.correct) {
                 var corrAns = _uiState.value.correctAns.toInt()
                 sharedViewModel.setCorrectAnswer(corrAns + 1)
                 corrAns += 1
                 _uiState.value = _uiState.value.copy(correctAns = stringScoreDisplay(corrAns))
-            }
-            else {
+            } else {
                 var wrongAns = _uiState.value.wrongAns.toInt()
                 sharedViewModel.setWrongAnswer(wrongAns + 1)
                 wrongAns += 1
@@ -214,10 +211,10 @@ class QuizViewModel(
         }
     }
 
-    fun onTimerFinished(question: QuizQuestion=questions[currentQuestionIndex]) {
+    fun onTimerFinished(question: QuizQuestion = questions[currentQuestionIndex]) {
         val nextIndex = currentQuestionIndex + 1
         //sharedViewModel.addQuestiontoQuiestionList(_uiState.value.currentQuestion!!)
-        if(sharedViewModel.category.value?.categoryName!="Тест на определение уровня") {
+        if (sharedViewModel.category.value?.categoryName != "Тест на определение уровня") {
             questions += _uiState.value.currentQuestion!!
             //questions=sharedViewModel.questionList.value!!
             var wrongAns = _uiState.value.wrongAns.toInt()
@@ -238,15 +235,13 @@ class QuizViewModel(
                         )
                     } else {
                         quizQuestionRepo.insertSrsTools(
-                            SRSTools(
-                                null,
-                                2.5,
-                                1,
-                                0,
-                                System.currentTimeMillis(),
-                                question.id,
-                                sharedViewModel.user.value?.id!!
-                            )
+                            2.5,
+                            1,
+                            0,
+                            System.currentTimeMillis(),
+                            question.id,
+                            sharedViewModel.user.value?.id!!
+
                         )
                     }
                 }
@@ -256,8 +251,7 @@ class QuizViewModel(
             //_uiState.value=_uiState.value.copy(wrongAns = sharedViewModel.wrongAnswer.value!!)
             _uiState.value =
                 _uiState.value.copy(wrongAns = stringScoreDisplay(wrongAns), repetitions = rep)
-        }
-        else {
+        } else {
             var wrongAns = _uiState.value.wrongAns.toInt()
             sharedViewModel.setWrongAnswer(wrongAns + 1)
             wrongAns += 1
@@ -271,19 +265,21 @@ class QuizViewModel(
         }
     }
 
-    fun stringScoreDisplay(score: Int) : String {
-        if(score==0)
+    fun stringScoreDisplay(score: Int): String {
+        if (score == 0)
             return "0"
         if (score < 10) {
             return "0${score}"
         }
         return score.toString()
     }
+
     private fun sendEvent(QuizEvent: QuizEvent) {
         viewModelScope.launch {
             _events.send(QuizEvent)
         }
     }
+
     fun navigateToResultsHandled() {
         sendEvent(QuizEvent.NavigateToResults)
     }
@@ -300,15 +296,15 @@ class QuizViewModel(
         val selectedOptionIndex: Int = -1,
         val showFeedback: Boolean = false,
         val isDelayActive: Boolean = false,
-        val correctAns:String = "0",
-        val wrongAns:String="0",
+        val correctAns: String = "0",
+        val wrongAns: String = "0",
         val repetitions: Int = 0,
-        val timerSeconds:Int = 30
+        val timerSeconds: Int = 30
     )
 
-    sealed class QuizEvent{
-        object NavigateToResults: QuizEvent()
+    sealed class QuizEvent {
+        object NavigateToResults : QuizEvent()
         object NavigateToMenu : QuizEvent()
-        data class showError(val error:String): QuizEvent()
+        data class showError(val error: String) : QuizEvent()
     }
 }

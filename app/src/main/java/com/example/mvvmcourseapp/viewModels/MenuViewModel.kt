@@ -43,8 +43,9 @@ class MenuViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val _events= Channel<MenuEvent>()
+    private val _events = Channel<MenuEvent>()
     val events = _events.receiveAsFlow()
+
     init {
         refreshDataIfPossible()
         checkSession()
@@ -61,12 +62,10 @@ class MenuViewModel(
                     quizQuestionRepo.refreshCategories()
                     quizQuestionRepo.refreshQuizQuestions()
                     quizQuestionRepo.refreshOptions()
-                    userRepo.refreshUserSettings()
-                    quizQuestionRepo.refreshSrsTools()
+                    userRepo.synchronizeUserSettings(sharedViewModel.user.value?.id!!)
+                    quizQuestionRepo.synchroniseSrsTools()
                 } catch (e: Exception) {
                     MenuEvent.showError("Ошибка обновления данных: ${e.message}")
-                    // Ошибка сети или сервера, ничего не делаем —
-                    // пользователь просто продолжит видеть старые данные из Room
                 }
             }
             _uiState.value = _uiState.value.copy(loading = false)
@@ -81,35 +80,34 @@ class MenuViewModel(
         }
 
         _uiState.value = _uiState.value.copy(userLoading = true)
-
         viewModelScope.launch {
             try {
                 val user = userRepo.getCurrentUser()
-                sharedViewModel.setUser(User(user.id, user.login, user.email, ""))
-                _uiState.value = _uiState.value.copy(userLoading = false)
 
+                // Возвращаемся на Main поток для обновления UI
+                with(Dispatchers.Main) {
+                    sharedViewModel.setUser(user)
+
+                    _uiState.value = _uiState.value.copy(
+                        userLoading = false,
+                        loading = false
+                    )
+                }
             } catch (e: Exception) {
-                // Если access истёк → пробуем обновить
-                val refreshed = userRepo.refreshToken()
+                Log.e("CheckSession", "Failed to load user", e)
 
-                if (refreshed) {
-                    try {
-                        val user = userRepo.getCurrentUser()
-                        sharedViewModel.setUser(User(user.id, user.login, user.email, ""))
-                    } catch (e: Exception) {
-                        sessionManager.logout()
-                        sharedViewModel.setUser(null)
-                    }
-                } else {
-                    sessionManager.logout()
+                // Проверяем, не разлогинился ли пользователь
+                if (!sessionManager.isLoggedIn()) {
                     sharedViewModel.setUser(null)
                 }
 
-                _uiState.value = _uiState.value.copy(loading = false)
+                _uiState.value = _uiState.value.copy(
+                    userLoading = false,
+                    loading = false
+                )
             }
         }
     }
-
 
 
     //Загрузка кнопок языков
@@ -118,7 +116,7 @@ class MenuViewModel(
             quizQuestionRepo.getLangsName()
                 .flowOn(Dispatchers.IO)
                 .collect { list ->
-                    _uiState.value=_uiState.value.copy(langButtons = list.map {
+                    _uiState.value = _uiState.value.copy(langButtons = list.map {
                         LangButton(name = it, image = categoryIcon(it))
                     })
                 }
@@ -131,14 +129,14 @@ class MenuViewModel(
             quizQuestionRepo.filter(query)
                 .flowOn(Dispatchers.IO)
                 .collect { list ->
-                    _uiState.value=_uiState.value.copy(processButtons = list.map { item ->
+                    _uiState.value = _uiState.value.copy(processButtons = list.map { item ->
                         ProcessButton(
                             title = "${item.langName} : ${item.category}",
                             cardsCount = "${item.cardsCount} вопросов",
                             image = categoryIcon(item.langName)
                         )
                     })
-                    _uiState.value=_uiState.value.copy(loading=false)
+                    _uiState.value = _uiState.value.copy(loading = false)
                 }
         }
     }
@@ -149,42 +147,39 @@ class MenuViewModel(
             quizQuestionRepo.accurateFilter(query)
                 .flowOn(Dispatchers.IO)
                 .collect { list ->
-                    _uiState.value=_uiState.value.copy(processButtons = list.map { item ->
+                    _uiState.value = _uiState.value.copy(processButtons = list.map { item ->
                         ProcessButton(
                             title = "${item.langName} : ${item.category}",
                             cardsCount = "${item.cardsCount} вопросов",
                             image = categoryIcon(item.langName)
                         )
                     })
-                    _uiState.value=_uiState.value.copy(loading=false)
+                    _uiState.value = _uiState.value.copy(loading = false)
                 }
         }
     }
 
-    fun navigateToSettings()
-    {
+    fun navigateToSettings() {
         sendEvent(MenuEvent.NavigateToSettings)
     }
 
-    fun navigateToLogin()
-    {
+    fun navigateToLogin() {
         sendEvent(MenuEvent.NavigateToLogin)
     }
 
-    fun navigateToPracticeMenu()
-    {
+    fun navigateToPracticeMenu() {
         sendEvent(MenuEvent.NavigateToPracticeMenu)
     }
 
-    fun navigateToStatistics()
-    {
+    fun navigateToStatistics() {
         sendEvent(MenuEvent.NavigateToStatistics)
     }
-    fun navigateToQuiz(){
+
+    fun navigateToQuiz() {
         sendEvent(MenuEvent.NavigateToQuiz)
     }
-    fun isNavigateToQuiz():Boolean
-    {
+
+    fun isNavigateToQuiz(): Boolean {
         if (sharedViewModel.user.isInitialized && sessionManager.isLoggedIn())
             return true
         return false
@@ -193,7 +188,7 @@ class MenuViewModel(
     //Пользователь выбрал категорию → сохраняем в SharedViewModel
     fun onProcessSelected(processButton: ProcessButton) {
         Log.d("USERCLICKQUIZ", sharedViewModel.user.value.toString())
-        if (!sharedViewModel.user.isInitialized || sharedViewModel.user.value==null) {
+        if (!sharedViewModel.user.isInitialized || sharedViewModel.user.value == null) {
             sendEvent(MenuEvent.showError("Авторизуйтесь для начала викторины"))
             return
         }
@@ -208,11 +203,15 @@ class MenuViewModel(
                 )
                 Log.wtf("MenuViewModel", "Category set: ${categoryItem.categoryName}")
                 if (categoryItem.categoryName == "Тест на определение уровня") {
-                    val questionsEnter = quizQuestionRepo.getQuizQuestionByCategoryAndLang(categoryItem)
+                    val questionsEnter =
+                        quizQuestionRepo.getQuizQuestionByCategoryAndLang(categoryItem)
                     Log.wtf("MenuViewModel", "Category set: ${categoryItem.id}, ${langItem.id}")
                     questions.addAll(questionsEnter)
                 } else {
-                    val uSettings = userRepo.getUserSettingsByLang(sharedViewModel.user.value!!, categoryItem.langId)
+                    val uSettings = userRepo.getUserSettingsByLang(
+                        sharedViewModel.user.value!!,
+                        categoryItem.langId
+                    )
                     Log.d("USERSETTINGS", uSettings.toString())
                     val questionsNew = quizQuestionRepo.getQuizQuestionByCategoryAndLangAndNew(
                         categoryItem,
@@ -1913,10 +1912,10 @@ class MenuViewModel(
 
 
     data class UiState(
-        val loading:Boolean=true,
-        val userLoading:Boolean=false,
-        val langButtons:List<LangButton> = emptyList(),
-        val processButtons:List<ProcessButton> = emptyList()
+        val loading: Boolean = true,
+        val userLoading: Boolean = false,
+        val langButtons: List<LangButton> = emptyList(),
+        val processButtons: List<ProcessButton> = emptyList()
     )
 
     sealed class MenuEvent {
@@ -1925,6 +1924,6 @@ class MenuViewModel(
         object NavigateToSettings : MenuEvent()
         object NavigateToStatistics : MenuEvent()
         object NavigateToPracticeMenu : MenuEvent()
-        data class showError(val error:String): MenuEvent()
+        data class showError(val error: String) : MenuEvent()
     }
 }

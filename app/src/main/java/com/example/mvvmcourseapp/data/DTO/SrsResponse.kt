@@ -3,7 +3,7 @@ package com.example.mvvmcourseapp.data.DTO
 import com.example.mvvmcourseapp.data.models.SRSTools
 
 data class SrsResponse(
-    val id: Int,
+    val id: Long,
     val user: Int,
     val question: Int,
     val ef: Double,
@@ -13,13 +13,15 @@ data class SrsResponse(
 ) {
     fun toSrs(): SRSTools {
         return SRSTools(
-            id,
-            ef,
-            repetition_count,
-            interval,
-            last_review_date,
-            question,
-            user
+            id = null,
+            EF = ef,
+            n = repetition_count,
+            interval = interval,
+            lastReviewDate = last_review_date,
+            qqId = question,
+            userId = user,
+            isDirty = false,
+            serverId = id,
         )
     }
 }

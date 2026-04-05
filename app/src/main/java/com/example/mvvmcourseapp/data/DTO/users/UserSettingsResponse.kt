@@ -15,9 +15,9 @@ data class UserSettingsResponse(
             this.id,
             this.user,
             this.lang,
-            this.lang_lvl,
             this.new_questions,
-            this.max_rep_questions
+            this.new_questions,
+            this.lang_lvl
         )
     }
 }

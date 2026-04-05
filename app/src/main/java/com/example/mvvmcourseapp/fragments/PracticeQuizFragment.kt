@@ -61,12 +61,10 @@ class PracticeQuizFragment : Fragment(R.layout.fragment_practice_quiz) {
     }
 
     private fun setupUI() {
-        // Соответствие ID: back_to_menu
         binding.backToMenu.setOnClickListener {
             practiceQuizViewModel.navigateToPracticeMenu()
         }
 
-        // Соответствие ID: btnVerify
         binding.btnVerify.setOnClickListener {
             val userCode = binding.codeEditText.text.toString()
             practiceQuizViewModel.onActionClicked(userCode)

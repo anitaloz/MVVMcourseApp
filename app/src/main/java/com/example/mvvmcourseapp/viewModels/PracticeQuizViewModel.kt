@@ -82,12 +82,12 @@ class PracticeQuizViewModel(
                 if (response.isSuccessful) {
                     tasks = response.body()?.tasks ?: emptyList()
 
-                    // ✅ ПРАВИЛЬНО: Обновление SharedViewModel на Main потоке
                     withContext(Dispatchers.Main) {
                         sharedViewModel.setQuestionList(emptyList())
                         sharedViewModel.setWrongAnswer(0)
                         sharedViewModel.setCorrectAnswer(0)
                         sharedViewModel.setTotalSize(tasks.size)
+                        sharedViewModel.setCurrentFileId(-1)
                     }
 
                     if (tasks.isNotEmpty()) {
@@ -95,7 +95,6 @@ class PracticeQuizViewModel(
                     }
                 }
             } catch (e: Exception) {
-                // sendEvent уже использует viewModelScope.launch, но добавим явное переключение
                 withContext(Dispatchers.Main) {
                     sendEvent(PracticeQuizEvent.ShowToast("Ошибка загрузки: ${e.message}"))
                 }
@@ -106,7 +105,6 @@ class PracticeQuizViewModel(
     // Метод для подготовки конкретного задания по индексу
     private fun setupTask(index: Int) {
         if (index >= tasks.size) {
-            // Если задания закончились — переходим на экран результатов (или в меню)
             navigateToPracticeResult()
             return
         }
@@ -153,7 +151,6 @@ class PracticeQuizViewModel(
     }
 
     data class PracticeQuizUiState(
-        val listOfTasks: List<GeneratedTaskResponse> = emptyList(),
         val currentQuestion: GeneratedTaskResponse? = null,
         val questionNumber: Int = 0,
         val totalQuestions: Int = 0,
